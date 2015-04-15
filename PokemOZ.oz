@@ -1,4 +1,6 @@
 declare NewPortObject PokemozBehaviour Fight
+
+%Le classe PortObject
 fun {NewPortObject Behaviour Init}
    proc {MsgLoop S1 State}
       case S1 of Msg|S2 then
@@ -33,17 +35,15 @@ fun{PokemozBehaviour Msg State}
 						      n(lx:9 hp:28 xp:30)
 						      n(lx:10 hp:30 xp:50))
 				    fun{NewLevel N XP}
-				       if N==0 then
+				       if N==0 then %trouve la nouvelle valeur des xp
 					  local NewXp in
 					     if(Enemy.lx > State.lx)then NewXp = State.xp + Enemy.lx - State.lx
 					     else NewXp = State.xp + 1 end
 					     {NewLevel N+1 NewXp}
 					  end
-				       elseif N==7 then pokemon(name:State.name type:State.type xp:XP hp:State.hp lx:State.lx)
-				       elseif {And (XP >= LevelList.N.xp) (State.lx < LevelList.N.lx)} then
+				       elseif N==7 then pokemon(name:State.name type:State.type xp:XP hp:State.hp lx:State.lx) %dans le cas ou aucun increment de niveau est necessaire
+				       elseif {And (XP >= LevelList.N.xp) (State.lx < LevelList.N.lx)} then %dans le cas ou il faut changer de niveau
 					  pokemon(name:State.name type:State.type xp:XP hp:LevelList.N.hp lx:LevelList.N.lx)
-				       %elseif XP >= LevelList.N.xp then
-				       %pokemon(name:State.name type:State
 				       else
 					  {NewLevel N+1 XP}
 				       end
@@ -55,7 +55,7 @@ fun{PokemozBehaviour Msg State}
    end
 end
 
-
+%simule les combats entre les pokemons. Renvoie le pokemon vainceur et modifie les niveaux si besoin
 fun{Fight PokemozA PokemozD}
    local Grid = grid( grass:grid(grass:2 fire:1 water:3)
 		      fire:grid(grass:3 fire:2 water:1)
@@ -65,11 +65,6 @@ fun{Fight PokemozA PokemozD}
    in
       {Send PokemozA getState(StateA)}
       {Send PokemozD getState(StateD)}
-      
-      {Browse 'newTurn'}
-      {Browse StateA}
-      {Browse StateD}
-      
       if (StateA.hp == 0) then {Send PokemozD watchEndOfFight(StateA)} PokemozD
       elseif (StateD.hp == 0) then {Send PokemozA watchEndOfFight(StateD)} PokemozA
       elseif (({OS.rand} mod 100) > ((6+StateA.lx-StateD.lx)*9)) then {Fight PokemozD PokemozA}
@@ -80,10 +75,11 @@ fun{Fight PokemozA PokemozD}
    end
 end
 
+%juste une preuve de la bonne fonctionalite
 local
-   A = {NewPortObject PokemozBehaviour pokemon(name:oli type:grass lx:5 xp:4 hp:20)}
-   B = {NewPortObject PokemozBehaviour pokemon(name:cha type:grass lx:5 xp:4 hp:20)}
-   C = {NewPortObject PokemozBehaviour pokemon(name:con type:grass lx:5 xp:0 hp:1)}
+   A = {NewPortObject PokemozBehaviour pokemon(name:oli type:fire lx:10 xp:50 hp:1)}
+   B = {NewPortObject PokemozBehaviour pokemon(name:cha type:water lx:5 xp:3 hp:20)}
+   C = {NewPortObject PokemozBehaviour pokemon(name:con type:fire lx:5 xp:0 hp:1)}
    Winner1
    StateWinner1
    Winner2
@@ -93,12 +89,9 @@ in
    {Send Winner1 getState(StateWinner1)}
    {Browse 'winner1'}
    {Browse StateWinner1}
+   
    Winner2 = {Fight Winner1 C}
    {Send Winner2 getState(StateWinner2)}
+   {Browse 'winner2'}
    {Browse StateWinner2}
 end
-
-
-
-	 
-	 
