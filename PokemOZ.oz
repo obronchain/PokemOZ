@@ -6,7 +6,7 @@ declare NewPortObject PokemozBehaviour Map Fight TrainerBehaviour Trainers
 %Trainers La liste des entraineurs enemis sur le terrain (Des Ports object et pas des tuples)
 
 %PokemozBehaviour (getState(X) watchEndOfFight(Enemy) injure(X))
-%TrainerBehaviour (move(Dir Boolean Enemy) getState(X) fight(Enemy)) Dir = 'up' ou 'down' ou 'left ou 'right' Boolean indique si enemy
+%TrainerBehaviour (move(dir:Dir boolean:Boolean enemy:Enemy) getState(X) fight(Enemy)) Dir = 'up' ou 'down' ou 'left ou 'right' Boolean indique si enemy
 %       fight peut se faire battre un trainer avec un autre trainer ou un autre pokemon
 
 %Le classe PortObject
@@ -87,7 +87,7 @@ end
 fun{TrainerBehaviour Msg State}
    case Msg of
       getState(X) then X = State State
-   []move(dir:Dir boolean:Boolean enemy:Enemy) then
+   []move(dir:Dir boolean:Boolean enemy:Enemy) then %Enemy est soit un portObject trainer soit un tuple pokemon 
       local NewX NewY in
 	 %trouver la nouvelle position
 	 case Dir of
@@ -97,11 +97,10 @@ fun{TrainerBehaviour Msg State}
 		       else NewY = State.positionY+1 NewX = State.positionX end
 	 []'left' then if(State.positionX-1<0) then NewX = State.positionX NewY = State.positionY
 		       else NewX = State.positionX-1 NewY = State.positionY end
-	 []'right' then {Browse 'seeMoveright'} if(State.positionX+1 >6) then NewX = State.positionX NewY = State.positionY
+	 []'right' then if(State.positionX+1 >6) then NewX = State.positionX NewY = State.positionY
 			else NewX = State.positionX+1 NewY = State.positionY end
 	 end
-	 {Browse NewX}
-	 {Browse NewY}
+
 	 %voir si il y a eut changement de position
 	 if {And State.positionY==NewY State.positionX==NewX} then Boolean = false State
 	 else
@@ -123,13 +122,13 @@ fun{TrainerBehaviour Msg State}
 	       end
 	       
 	       Result={FindIfTrainer ['#'(x:NewX+1 y:NewY) '#'(x:NewX-1 y:NewY) '#'(x:NewX y:NewY+1) '#'(x:NewX y:NewY-1)] Trainers}
-	       if(Result.boolean) then {Browse 'pas1'} Boolean = true Enemy=Result.trainer trainer(name:State.name positionX:NewX
+	       if(Result.boolean) then Boolean = true Enemy=Result.trainer trainer(name:State.name positionX:NewX
 					    positionY:NewY pokemon:State.pokemon) % il y a un trainer a cote
-	       elseif(({OS.rand} mod 100) < 30) then {Browse 'pas2'} Boolean = true Enemy = pokemon(name:wild type:grass lx:5 xp:5 hp:5)
+	       elseif(({OS.rand} mod 100) < 30) then  Boolean = true Enemy = pokemon(name:wild type:grass lx:5 xp:5 hp:5)
 		  trainer(name:State.name positionX:NewX
 					    positionY:NewY pokemon:State.pokemon)
 
-	       else Boolean = false {Browse 'pas3'} trainer(name:State.name positionX:NewX
+	       else Boolean = false  trainer(name:State.name positionX:NewX
 					    positionY:NewY pokemon:State.pokemon)end %rien du tout 
  	    end
 	 end
@@ -145,13 +144,13 @@ fun{TrainerBehaviour Msg State}
    end
 end
 
-
+%preuve du bon fonctionnement 
 local
    PokemonA = {NewPortObject PokemozBehaviour pokemon(name:olipokemon type:grass lx:5 xp:0 hp:20)}
    PokemonB = {NewPortObject PokemozBehaviour pokemon(name:enemypokemon type:grass lx:5 xp:0 hp:20)}
    TrainerA = {NewPortObject TrainerBehaviour trainer(positionX:0 positionY:0 name:oli pokemon:PokemonA)}
-   ResultMove1 = move(dir:'down' boolean:_ enemy:_)
-   ResultMove2 = move(dir:'right' boolean:_ enemy:_)
+   ResultMove1 = move(dir:'left' boolean:_ enemy:_)
+   ResultMove2 = move(dir:'left' boolean:_ enemy:_)
    State1
    State2
    State3
@@ -163,11 +162,7 @@ in
    {Browse State1}
    {Browse ResultMove2}
    {Send TrainerA ResultMove2}
-   {Browse ResultMove2.enemy}
-   {Send TrainerA fight(ResultMove2.enemy)}
-   {Delay 1000}
-   {Send PokemonA getState(State2)}
-   {Send PokemonB getState(State3)}
+   {Send TrainerA getState(State2)}
    {Browse State2}
-   {Browse State3}
+
 end
