@@ -7,6 +7,7 @@ export
    Init
    Browse
    Player
+   PokemonPlayer
 define
    NewPortObject
    PokemozBehaviour
@@ -33,7 +34,7 @@ in
    
 %Le classe PortObject
    proc{Init}
-      local  PokemonPlayer EnemyPokemon in 
+      local  EnemyPokemon in 
 	 PokemonPlayer = {NewPortObject PokemozBehaviour pokemon(name:mapute type:grass hp:20 lx:5 xp:0)}
 	 EnemyPokemon = {NewPortObject PokemozBehaviour pokemon(name:enemypokemon type:grass hp:3 lx:5 xp:0)}
 	 Trainers = [ trainer(name:enemy pokemon:EnemyPokemon positionX:3 positionY:3)]
