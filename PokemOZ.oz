@@ -8,6 +8,8 @@ export
    Browse
    Player
    PokemonPlayer
+   PokemozBehaviour
+   NewPortObject
 define
    NewPortObject
    PokemozBehaviour
@@ -168,7 +170,6 @@ in
 	    end
 	 end
       []fight(Enemy) then
-	 {Browse 'in fight'}
 	 case Enemy of trainer(name:Name pokemon:PokemonEnemy positionX:X positionY:Y) then local Winner in Winner = {Fight State.pokemon PokemonEnemy} end  State
 	 [] pokemon(name:Name type:Type lx:Lx xp:Xp hp:Hp) then
 	    local PokemonEnemy={NewPortObject PokemozBehaviour Enemy} Winner in
