@@ -39,7 +39,7 @@ in
       local  EnemyPokemon in 
 	 PokemonPlayer = {NewPortObject PokemozBehaviour pokemon(name:mapute type:grass hp:20 lx:5 xp:0)}
 	 EnemyPokemon = {NewPortObject PokemozBehaviour pokemon(name:enemypokemon type:grass hp:3 lx:5 xp:0)}
-	 Trainers = [ trainer(name:enemy pokemon:EnemyPokemon positionX:3 positionY:3)]
+	 Trainers = [ {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:EnemyPokemon positionX:3 positionY:3)}]
 	 Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0)}
 	 {Browse 'endInit'}
 	 {Browse Trainers}
@@ -128,7 +128,7 @@ in
 	 %trouver la nouvelle position
 	    case Dir of
 	       'up' then if(State.positionY-1 < 0) then NewY = State.positionY NewX = State.positionX
-			 else NewY = State.positionY-1 NewX = State.positonX end
+			 else NewY = State.positionY-1 NewX = State.positionX end
 	    []'down' then if(State.positionY+1 > 6) then NewY = State.positionY NewX = State.positionX
 			  else NewY = State.positionY+1 NewX = State.positionX end
 	    []'left' then if(State.positionX-1<0) then NewX = State.positionX NewY = State.positionY
@@ -142,7 +142,6 @@ in
 	    else
 	    %definition d'une fonction pour trouver si il y un trainer (retourne un tuple is(boolean trainer))
 	       local FindIfTrainer FindIfIn Result in
-	       
 		  fun{FindIfIn PositionX PositionY L}
 		     case L of nil then false
 		     []H|T then if{And PositionX==H.x PositionY==H.y} then true
@@ -152,15 +151,18 @@ in
 	       
 		  fun{FindIfTrainer PP List} %PP liste des positions possibles et List la liste des trainers
 		     case List of nil then is(boolean:false trainer:_)
-		     []H|T then if{FindIfIn H.positionX H.positionY PP} then is(boolean:true trainer:H)
-				else {FindIfTrainer PP T} end
+		     []H|T then
+			local State in {Send H getState(State)}
+			if{FindIfIn State.positionX State.positionY PP} then is(boolean:true trainer:H)
+			else {FindIfTrainer PP T} end
+			end
 		     end
 		  end
 	       
 		  Result={FindIfTrainer ['#'(x:NewX+1 y:NewY) '#'(x:NewX-1 y:NewY) '#'(x:NewX y:NewY+1) '#'(x:NewX y:NewY-1)] Trainers}
 		  if(Result.boolean) then Boolean = true Enemy=Result.trainer trainer(name:State.name positionX:NewX
 										      positionY:NewY pokemon:State.pokemon) % il y a un trainer a cote
-		  elseif(({OS.rand} mod 100) < 30) then  Boolean = true Enemy = pokemon(name:wild type:grass lx:5 xp:5 hp:5)
+		  elseif(({OS.rand} mod 100) < 30) then  Boolean = true Enemy = {NewPortObject PokemozBehaviour pokemon(name:wild type:grass lx:5 xp:5 hp:5) }
 		     trainer(name:State.name positionX:NewX
 			     positionY:NewY pokemon:State.pokemon)
 
@@ -169,11 +171,14 @@ in
 	       end
 	    end
 	 end
-      []fight(Enemy) then
-	 case Enemy of trainer(name:Name pokemon:PokemonEnemy positionX:X positionY:Y) then local Winner in Winner = {Fight State.pokemon PokemonEnemy} end  State
-	 [] pokemon(name:Name type:Type lx:Lx xp:Xp hp:Hp) then
-	    local PokemonEnemy={NewPortObject PokemozBehaviour Enemy} Winner in
-	       Winner = {Fight State.pokemon PokemonEnemy} State
+      []fight(EnemyObject) then
+	 local Enemy in
+	    {Send EnemyObject getState(Enemy)}
+	    case Enemy of trainer(name:Name pokemon:PokemonEnemy positionX:X positionY:Y) then local Winner in Winner = {Fight State.pokemon PokemonEnemy} end  State
+	    [] pokemon(name:Name type:Type lx:Lx xp:Xp hp:Hp) then
+	       local PokemonEnemy={NewPortObject PokemozBehaviour Enemy} Winner in
+		  Winner = {Fight State.pokemon PokemonEnemy} State
+	       end
 	    end
 	 end
       end

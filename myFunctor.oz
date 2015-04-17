@@ -48,34 +48,39 @@ define
       end
    end
    
-   proc{HandelFight Enemy}
-      case Enemy of
-	 pokemon(name:Name type:Type lx:Lx hp:Hp xp:Xp) then
-	 local
-	    Ret
-	    Desc
-	 in 
-	    Desc = td( label(text:"you find a wild pokemon")
-		       button(text:"show enemy's pokemon" action:proc{$}{ShowPokemon {NewPortObject PokemozBehaviour Enemy} "wildPokemon"} end)
-		       button(text:"Fight" action:proc{$} Ret = true end)
-		       button(text:"Run" action:proc{$} Ret = false end)
-		       button(text:"Close" action:toplevel#close)
-		     )
-	    {{QTk.build Desc} show}
+   proc{HandelFight EnemyObject}
+      local Enemy
+      in
+	 {Send EnemyObject getState(Enemy)}
+	 case Enemy of
+	    pokemon(name:Name type:Type lx:Lx hp:Hp xp:Xp) then
+	    local
+	       Ret
+	       Desc
+	    in 
+	       Desc = td( label(text:"you find a wild pokemon")
+			  button(text:"show enemy's pokemon" action:proc{$}{ShowPokemon EnemyObject "wildPokemon"} end)
+			  button(text:"Fight" action:proc{$} Ret = true end)
+			  button(text:"Run" action:proc{$} Ret = false end)
+			  button(text:"Close" action:toplevel#close)
+			)
+	       {{QTk.build Desc} show}
 	    
-	    if Ret then {Send Player fight(Enemy)}
-	    else
-	       skip
+	       if Ret then {Send Player fight(EnemyObject)}
+	       else
+		  skip
+	       end
 	    end
-	 end
-      []trainer(name:Name pokemon:Pokemon positionX:PosX positionY:PosY) then
-	 local
-	    Desc = td( label(text:"you find another trainer")
-		       button(text:"ShowEnemyPokemon" action:proc{$} {ShowPokemon Pokemon "enemy s pokemon"} end)
-		       button(text:"Close" action:toplevel#close)
-		     )
-	 in
-	    {{QTk.build Desc} show}    
+	 []trainer(name:Name pokemon:Pokemon positionX:PosX positionY:PosY) then
+	    local
+	       Desc = td( label(text:"you find another trainer")
+			  button(text:"ShowEnemyPokemon" action:proc{$} {ShowPokemon Pokemon "enemy s pokemon"} end)
+			  button(text:"BeginFight" action:proc{$} {Send Player fight(EnemyObject)}end)
+			  button(text:"Close" action:toplevel#close)
+			)
+	    in
+	       {{QTk.build Desc} show}    
+	    end
 	 end
       end
    end
