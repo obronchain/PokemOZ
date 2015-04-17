@@ -1,4 +1,5 @@
-declare NewPortObject PokemozBehaviour Map Fight TrainerBehaviour Trainers
+functor import System OS define  NewPortObject PokemozBehaviour Map Fight TrainerBehaviour Trainers Browse=System.browse  in
+
 %pokemon(name type lx hp xp)
 %trainer(name positionX positionY pokemon)
 %Map contient la carte
@@ -164,5 +165,7 @@ in
    {Send TrainerA ResultMove2}
    {Send TrainerA getState(State2)}
    {Browse State2}
+
+end
 
 end
