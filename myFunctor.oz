@@ -10,7 +10,6 @@ define
    Init = PokemOZ.init
    PokemozBehaviour = PokemOZ.pokemozBehaviour
    NewPortObject = PokemOZ.newPortObject
-   
    proc{ShowPokemon Pokemon Label}
       local
 	 Desc
@@ -55,21 +54,15 @@ define
 	 case Enemy of
 	    pokemon(name:Name type:Type lx:Lx hp:Hp xp:Xp) then
 	    local
-	       Ret
 	       Desc
 	    in 
 	       Desc = td( label(text:"you find a wild pokemon")
 			  button(text:"show enemy's pokemon" action:proc{$}{ShowPokemon EnemyObject "wildPokemon"} end)
-			  button(text:"Fight" action:proc{$} Ret = true end)
-			  button(text:"Run" action:proc{$} Ret = false end)
-			  button(text:"Close" action:toplevel#close)
+			  button(text:"Fight" action:proc{$} {Send Player fight(EnemyObject)} end)
+			  button(text:"Run" action:toplevel#close)
 			)
 	       {{QTk.build Desc} show}
-	    
-	       if Ret then {Send Player fight(EnemyObject)}
-	       else
-		  skip
-	       end
+	       
 	    end
 	 []trainer(name:Name pokemon:Pokemon positionX:PosX positionY:PosY) then
 	    local
@@ -87,16 +80,16 @@ define
       
    proc{HandelMove Dir}
       local
-	 State1 State2 Move=move(dir:Dir enemy:_ boolean:_)
+	 Move=move(dir:Dir enemy:_ boolean:_) State
       in
-	 {Send Player getState(State2)}
-	 {Browse State2}
 	 {Send Player Move}
 	 if Move.boolean then
 	    {HandelFight Move.enemy}
 	 else
 	    skip
 	 end
+	 {Send Player getState(State)}
+	 {Browse State}
       end
    end
 	 

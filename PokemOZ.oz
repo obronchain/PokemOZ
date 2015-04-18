@@ -21,9 +21,42 @@ define
    PokemonPlayer
    Browse
    Init
+   LevelList
+   GenerateRandomPokemon
+   PokemonNameList
 in
    Browse = Browser.browse
-   
+   LevelList = level(
+		  n(lx:5 hp:20 xp:0)
+		  n(lx:6 hp:22 xp:5)
+		  n(lx:7 hp:24 xp:12)
+		  n(lx:8 hp:26 xp:20)
+		  n(lx:9 hp:28 xp:30)
+		  n(lx:10 hp:30 xp:50))
+   PokemonNameList = pokemonname(n(name:carapuce type:water)
+				 n(name:bulbizare type:grass)
+				 n(name:salameche type:fire)
+				)
+   fun{GenerateRandomPokemon}
+      local Pokemon InitialValue = pokemon(name:_ type:_ lx:_ hp:_ xp:_) Level State Loop Random in
+	 {Send PokemonPlayer getState(State)}
+	 Level = State.lx + ({OS.rand} mod 3) - 1
+	 Random = ({OS.rand} mod 3) + 1
+	 proc{Loop N}
+	    if {Or Level<5 {Or Level == LevelList.N.lx Level>10}} then
+	       InitialValue.lx = LevelList.N.lx
+	       InitialValue.hp = LevelList.N.hp
+	       InitialValue.xp = LevelList.N.xp
+	    else
+	       {Loop N+1}
+	    end
+	 end
+	 {Loop 1}
+	 InitialValue.name = PokemonNameList.Random.name
+	 InitialValue.type = PokemonNameList.Random.type
+	 {NewPortObject PokemozBehaviour InitialValue}
+      end
+   end
 %pokemon(name type lx hp xp)
 %trainer(name positionX positionY pokemon)
 %Map contient la carte
@@ -36,11 +69,12 @@ in
    
 %Le classe PortObject
    proc{Init}
-      local  EnemyPokemon in 
+      local  EnemyPokemon in
+	 {Browse 'begin Init'}
 	 PokemonPlayer = {NewPortObject PokemozBehaviour pokemon(name:mapute type:grass hp:20 lx:5 xp:0)}
 	 EnemyPokemon = {NewPortObject PokemozBehaviour pokemon(name:enemypokemon type:grass hp:3 lx:5 xp:0)}
-	 Trainers = [ {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:EnemyPokemon positionX:3 positionY:3)}]
 	 Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0)}
+	 Trainers = [{NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3)}]
 	 {Browse 'endInit'}
 	 {Browse Trainers}
       end
@@ -71,14 +105,18 @@ in
 			end
       %Lie letat du portObject a X
       []getState(X) then X = State State
+      []cure(X) then local
+			NewHp
+			proc{Loop N}
+			   if LevelList.N.lx==State.lx then NewHp = LevelList.N.hp
+			   else {Loop+1} end 
+			end
+		     in
+			{Loop 1}
+			pokemon(name:State.name type:State.type xp:State.xp hp:NewHp lx:State.lx)
+		     end
       %Permet de mettre les valeurs des hp level des pokemoz apres un combat
-      []watchEndOfFight(Enemy) then local LevelList = level(
-							 n(lx:5 hp:20 xp:0)
-							 n(lx:6 hp:22 xp:5)
-							 n(lx:7 hp:24 xp:12)
-							 n(lx:8 hp:26 xp:20)
-							 n(lx:9 hp:28 xp:30)
-							 n(lx:10 hp:30 xp:50))
+      []watchEndOfFight(Enemy) then local 
 				       fun{NewLevel N XP}
 					  if N==0 then %trouve la nouvelle valeur des xp
 					     local NewXp in
@@ -135,10 +173,10 @@ in
 			  else NewX = State.positionX-1 NewY = State.positionY end
 	    []'right' then if(State.positionX+1 >6) then NewX = State.positionX NewY = State.positionY
 			   else NewX = State.positionX+1 NewY = State.positionY end
-	    end
-
+	    end	    
 	 %voir si il y a eut changement de position
-	    if {And State.positionY==NewY State.positionX==NewX} then Boolean = false State
+	    if {And NewX==0 NewY==0} then {Send State.pokemon cure(_)} Boolean = false trainer(name:State.name pokemon:State.pokemon positionX:NewX positionY:NewY)
+	    elseif {And State.positionY==NewY State.positionX==NewX} then Boolean = false State
 	    else
 	    %definition d'une fonction pour trouver si il y un trainer (retourne un tuple is(boolean trainer))
 	       local FindIfTrainer FindIfIn Result in
@@ -153,8 +191,8 @@ in
 		     case List of nil then is(boolean:false trainer:_)
 		     []H|T then
 			local State in {Send H getState(State)}
-			if{FindIfIn State.positionX State.positionY PP} then is(boolean:true trainer:H)
-			else {FindIfTrainer PP T} end
+			   if{FindIfIn State.positionX State.positionY PP} then is(boolean:true trainer:H)
+			   else {FindIfTrainer PP T} end
 			end
 		     end
 		  end
@@ -162,7 +200,7 @@ in
 		  Result={FindIfTrainer ['#'(x:NewX+1 y:NewY) '#'(x:NewX-1 y:NewY) '#'(x:NewX y:NewY+1) '#'(x:NewX y:NewY-1)] Trainers}
 		  if(Result.boolean) then Boolean = true Enemy=Result.trainer trainer(name:State.name positionX:NewX
 										      positionY:NewY pokemon:State.pokemon) % il y a un trainer a cote
-		  elseif(({OS.rand} mod 100) < 30) then  Boolean = true Enemy = {NewPortObject PokemozBehaviour pokemon(name:wild type:grass lx:5 xp:5 hp:5) }
+		  elseif(({OS.rand} mod 100) < 30) then  Boolean = true Enemy = {GenerateRandomPokemon}
 		     trainer(name:State.name positionX:NewX
 			     positionY:NewY pokemon:State.pokemon)
 
@@ -175,10 +213,8 @@ in
 	 local Enemy in
 	    {Send EnemyObject getState(Enemy)}
 	    case Enemy of trainer(name:Name pokemon:PokemonEnemy positionX:X positionY:Y) then local Winner in Winner = {Fight State.pokemon PokemonEnemy} end  State
-	    [] pokemon(name:Name type:Type lx:Lx xp:Xp hp:Hp) then
-	       local PokemonEnemy={NewPortObject PokemozBehaviour Enemy} Winner in
-		  Winner = {Fight State.pokemon PokemonEnemy} State
-	       end
+	    [] pokemon(name:Name type:Type lx:Lx xp:Xp hp:Hp) then	  
+	       local Winner = {Fight State.pokemon EnemyObject} in  State end 
 	    end
 	 end
       end
