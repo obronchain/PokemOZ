@@ -8,6 +8,7 @@ export
    Browse
    Player
    PokemonPlayer
+   Map
    PokemozBehaviour
    NewPortObject
 define
@@ -26,6 +27,14 @@ define
    PokemonNameList
 in
    Browse = Browser.browse
+   Map = column(line(0 0 0 0 0 0 0)
+		line(0 0 0 0 0 0 0)
+		line(0 0 0 0 0 0 0)
+		line(0 0 0 0 0 0 0)
+		line(0 0 0 0 0 0 0)
+		line(0 0 0 0 0 0 0)
+		line(0 0 0 0 0 0 0)
+		)
    LevelList = level(
 		  n(lx:5 hp:20 xp:0)
 		  n(lx:6 hp:22 xp:5)
@@ -214,7 +223,8 @@ in
 	    {Send EnemyObject getState(Enemy)}
 	    case Enemy of trainer(name:Name pokemon:PokemonEnemy positionX:X positionY:Y) then local Winner in Winner = {Fight State.pokemon PokemonEnemy} end  State
 	    [] pokemon(name:Name type:Type lx:Lx xp:Xp hp:Hp) then	  
-	       local Winner = {Fight State.pokemon EnemyObject} in  State end 
+	       local Winner = {Fight State.pokemon EnemyObject} in  State end
+	       
 	    end
 	 end
       end

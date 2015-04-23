@@ -8,6 +8,7 @@ define
    Browse = PokemOZ.browse
    PokemonPlayer = PokemOZ.pokemonPlayer
    Init = PokemOZ.init
+   Map = PokemOZ.map
    PokemozBehaviour = PokemOZ.pokemozBehaviour
    NewPortObject = PokemOZ.newPortObject
    proc{ShowPokemon Pokemon Label}
