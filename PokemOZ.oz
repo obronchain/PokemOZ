@@ -95,14 +95,18 @@ in
    
 %Le classe PortObject
    proc{Init}
-      local  EnemyPokemon in
-	 {Browse 'begin Init'}
+      local  EnemyPokemon Loop in
 	 PokemonPlayer = {NewPortObject PokemozBehaviour pokemon(name:mapute type:grass hp:20 lx:5 xp:0)}
-	 EnemyPokemon = {NewPortObject PokemozBehaviour pokemon(name:enemypokemon type:grass hp:3 lx:5 xp:0)}
 	 Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0)}
 	 Trainers = [Player {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3)}]
-	 {Browse 'endInit'}
-	 {Browse Trainers}
+	 proc{Loop L}
+	    case L of nil then skip
+	    []H|T then if (H==Player) then {Loop T}
+		       else thread {MoveTrainersMap H} end {Loop T}
+		       end
+	    end
+	 end
+	 {Loop Trainers}
       end
    end
      
@@ -203,10 +207,9 @@ in
 	    end	    
 	 %voir si il y a eut changement de position
 	    {Browse 'beforeIf'}
-	    if {And NewX==0 NewY==0} then {Send State.pokemon cure(_)} {Browse 'z1'} Boolean = false trainer(name:State.name pokemon:State.pokemon positionX:NewX positionY:NewY)
-	    elseif {Or {And State.positionY==NewY State.positionX==NewX} {Bool.'not' {IsFreePositionFor ThisTrainer Trainers NewX NewY}}} then {Browse 'z2'} Boolean = false State
+	    if {And NewX==0 NewY==0} then {Send State.pokemon cure(_)}  Boolean = false trainer(name:State.name pokemon:State.pokemon positionX:NewX positionY:NewY)
+	    elseif {Or {And State.positionY==NewY State.positionX==NewX} {Bool.'not' {IsFreePositionFor ThisTrainer Trainers NewX NewY}}} then Boolean = false State
 	    else
-	       {Browse 'z3'}
 	    %definition d'une fonction pour trouver si il y un trainer (retourne un tuple is(boolean trainer))
 	       local FindIfTrainer FindIfIn Result in
 		  fun{FindIfIn PositionX PositionY L}
@@ -254,19 +257,21 @@ in
    end
 
 %permet d'envoyer des moveTrainer(ObjectTrainer) à la carte
-   proc{MoveTrainersMap Trainer N}
+   proc{MoveTrainersMap Trainer}
       local
 	 NewList     
 	 proc{Loop}
 	    {Delay (10-Speed)*200}
-	    local Move = move(dir:_ positionX:_ positionY:_ trainer:Trainer) Random in
+	    local Move = move(dir:_ boolean:_ enemy:_ trainer:Trainer) Random in
 	       Random  = ({OS.rand} mod 100 )
-	       if Random < 25 then move.dir = 'up'
-	       elseif Random <50 then move.dir = 'right'
-	       elseif Random <75 then move.dir = 'down'
-	       else move.dir = 'left'
+	       if Random < 25 then Move.dir = 'up'
+	       elseif Random <50 then Move.dir = 'right'
+	       elseif Random <75 then Move.dir = 'down'
+	       else Move.dir = 'left'
 	       end
 	       {Send Trainer Move}
+	       {Browse 'ilabouge'}
+	       {Loop}
 	    end
 	 end
       in
