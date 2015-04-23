@@ -11,7 +11,7 @@ define
    Map = PokemOZ.map
    PokemozBehaviour = PokemOZ.pokemozBehaviour
    NewPortObject = PokemOZ.newPortObject
-<<<<<<< HEAD
+
    ImageWidth=60
    GrassGood = {QTk.newImage photo(url:'Images/grassgood.gif' height:0 width:0)}
    GrassBad = {QTk.newImage photo(url:'Images/grassbad.gif' height:0 width:0)}
@@ -41,9 +41,8 @@ define
 	 {CreateCanvas 1 1}
       end
    end
-=======
+
    
->>>>>>> f9b1bb854d11cec77c00358333f10568ab8e391d
    proc{ShowPokemon Pokemon Label}
       local
 	 Desc
@@ -82,9 +81,9 @@ define
    end
    
    proc{HandelFight Move}
-      local EnemyObject Enemy WaitVal
+      local Enemy EnemyObject WaitVal
       in
-	 EnemyObject = Move.enemy
+	 EnemyObject = Move.ennemy
 	 {Send EnemyObject getState(Enemy)}
 	 case Enemy of
 	    pokemon(name:Name type:Type lx:Lx hp:Hp xp:Xp) then
@@ -92,13 +91,14 @@ define
 	       Desc
 	    in 
 	       Desc = td( label(text:"you find a wild pokemon")
-			  button(text:"show enemy's pokemon" action:proc{$}{ShowPokemon EnemyObject "wild Pokemon"} end)
+			  button(text:"show enemy's pokemon" action:proc{$}{ShowPokemon EnemyObject "wildPokemon"} end)
 			  button(text:"Fight" action:proc{$} {Send Player fight(EnemyObject)} WaitVal=unit end)
 			  button(text:"Run" action:proc{$} WaitVal=unit end)
 			)
 	       {{QTk.build Desc} show}
 	       {Wait WaitVal}
 	       {Send Player setBusy(false)}
+	       
 	    end
 	 []trainer(name:Name pokemon:Pokemon positionX:PosX positionY:PosY busy:Busy) then
 	    local
@@ -108,7 +108,7 @@ define
 			  button(text:"Close" action:toplevel#close)
 			)
 	    in
-	       {{QTk.build Desc} show}  
+	       {{QTk.build Desc} show}    
 	    end
 	    {Wait WaitVal}
 	    {Send Move.enemy setBusy(false)}
@@ -125,7 +125,7 @@ define
 	 {Send Player Move}
 	 {Browse Move.boolean}
 	 if Move.boolean then
-	    {Browse Move}
+	    {Bowse Move}
 	    {HandelFight Move}
 	 else
 	    skip
