@@ -49,9 +49,10 @@ define
       end
    end
    
-   proc{HandelFight EnemyObject}
-      local Enemy
+   proc{HandelFight Move}
+      local EnemyObject Enemy
       in
+	 EnemyObject = Move.enemy
 	 {Send EnemyObject getState(Enemy)}
 	 case Enemy of
 	    pokemon(name:Name type:Type lx:Lx hp:Hp xp:Xp) then
@@ -87,7 +88,7 @@ define
 	 {Send Player Move}
 	 {Browse Move.boolean}
 	 if Move.boolean then
-	    {HandelFight Move.enemy}
+	    {HandelFight Move}
 	 else
 	    skip
 	 end
