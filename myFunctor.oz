@@ -85,7 +85,6 @@ define
 	 Move=move(dir:Dir enemy:_ boolean:_ trainer:Player) State
       in
 	 {Send Player Move}
-	 {Browse 'afterMove'}
 	 {Browse Move.boolean}
 	 if Move.boolean then
 	    {HandelFight Move.enemy}
