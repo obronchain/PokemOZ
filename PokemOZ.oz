@@ -30,7 +30,7 @@ define
    PokemonNameList
    MoveTrainersMap
 in
-   Speed = 5
+   Speed = 0
    Browse = Browser.browse
    Map = column(line(0 0 0 0 0 0 0)
 		line(0 0 0 0 0 0 0)
@@ -63,6 +63,7 @@ in
 		  end
       end
    end
+   
    fun{GenerateRandomPokemon}
       local Pokemon InitialValue = pokemon(name:_ type:_ lx:_ hp:_ xp:_) Level State Loop Random in
 	 {Send PokemonPlayer getState(State)}
@@ -98,8 +99,8 @@ in
    proc{Init}
       local  EnemyPokemon Loop in
 	 PokemonPlayer = {NewPortObject PokemozBehaviour pokemon(name:mapute type:grass hp:20 lx:5 xp:0)}
-	 Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0)}
-	 Trainers = [Player {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 )}]
+	 Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0 busy:false)}
+	 Trainers = [Player {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}]
 	 proc{Loop L}
 	    case L of nil then skip
 	    []H|T then if (H==Player) then {Loop T}
@@ -107,7 +108,7 @@ in
 		       end
 	    end
 	 end
-	{Loop Trainers}
+	 {Loop Trainers}
       end
    end
      
@@ -192,78 +193,81 @@ in
    fun{TrainerBehaviour Msg State}
       case Msg of
 	 getState(X) then X = State State
-      []move(dir:Dir boolean:Boolean enemy:Enemy trainer:ThisTrainer) then %Enemy est soit un portObject trainer soit un tuple pokemon
-	    local NewX NewY in
-	       {Browse 'matchMove'}
+	 []setBusy(S) then {Browse  'setBusy'} {Browse S} trainer(name:State.name pokemon:State.pokemon positionX:State.positionX positionY:State.positionY busy:S)
+      []move(dir:Dir boolean:Boolean enemy:Enemy trainer:ThisTrainer free:Free) then %Enemy est soit un portObject trainer soit un tuple pokemon
+	 if State.busy then Boolean=false State
+	 else  local NewX NewY in
+		  {Browse 'matchMove'}
 	 %trouver la nouvelle position
-	       case Dir of
-		  'up' then if(State.positionY-1 < 0) then NewY = State.positionY NewX = State.positionX
-			    else NewY = State.positionY-1 NewX = State.positionX end
-	       []'down' then if(State.positionY+1 > 6) then NewY = State.positionY NewX = State.positionX
-			     else NewY = State.positionY+1 NewX = State.positionX end
-	       []'left' then if(State.positionX-1<0) then NewX = State.positionX NewY = State.positionY
-			     else NewX = State.positionX-1 NewY = State.positionY end
-	       []'right' then if(State.positionX+1 >6) then NewX = State.positionX NewY = State.positionY
-			      else NewX = State.positionX+1 NewY = State.positionY end
-	       end	    
+		  case Dir of
+		     'up' then if(State.positionY-1 < 0) then NewY = State.positionY NewX = State.positionX
+			       else NewY = State.positionY-1 NewX = State.positionX end
+		  []'down' then if(State.positionY+1 > 6) then NewY = State.positionY NewX = State.positionX
+				else NewY = State.positionY+1 NewX = State.positionX end
+		  []'left' then if(State.positionX-1<0) then NewX = State.positionX NewY = State.positionY
+				else NewX = State.positionX-1 NewY = State.positionY end
+		  []'right' then if(State.positionX+1 >6) then NewX = State.positionX NewY = State.positionY
+				 else NewX = State.positionX+1 NewY = State.positionY end
+		  end	    
 	 %voir si il y a eut changement de position
-	       {Browse 'beforeIf'}
-	       if {And NewX==0 NewY==0} then {Send State.pokemon cure(_)}  Boolean = false trainer(name:State.name pokemon:State.pokemon positionX:NewX positionY:NewY )
-	       elseif {Or {And State.positionY==NewY State.positionX==NewX} {Bool.'not' {IsFreePositionFor ThisTrainer Trainers NewX NewY}}} then Boolean=false State
-	       else
+		  if {And NewX==0 NewY==0} then {Send State.pokemon cure(_)}  Boolean = false trainer(name:State.name pokemon:State.pokemon positionX:NewX positionY:NewY busy:false )
+		  elseif {Or {And State.positionY==NewY State.positionX==NewX} {Bool.'not' {IsFreePositionFor ThisTrainer Trainers NewX NewY}}} then Boolean=false State
+		  elseif {Bool.'not' ThisTrainer==Player} then Boolean=false train(name:State.name pokemon:State.pokemon positionX:NewX positionY:NewY busy:false)
+		  else
 	       %definition d'une fonction pour trouver si il y un trainer (retourne un tuple is(boolean trainer))
-		  local FindIfTrainer FindIfIn Result in
-		     fun{FindIfIn PositionX PositionY L}
-			case L of nil then false
-			[]H|T then if{And PositionX==H.x PositionY==H.y} then true
-				   else {FindIfIn PositionX PositionY T} end
-			end		
-		     end
-		  
-		     fun{FindIfTrainer PP List} %PP liste des positions possibles et List la liste des trainers
-			case List of nil then is(boolean:false trainer:_)
-			[]H|T then
-			   local State in
-			      if H==ThisTrainer then {FindIfTrainer PP T}
-			      else 
-				 {Send H getState(State)}
-				 if{FindIfIn State.positionX State.positionY PP} then is(boolean:true trainer:H)
-				 else {FindIfTrainer PP T} end
+		     local FindIfTrainer FindIfIn Result in
+			fun{FindIfIn PositionX PositionY L}
+			   case L of nil then false
+			   []H|T then if{And PositionX==H.x PositionY==H.y} then true
+				      else {FindIfIn PositionX PositionY T} end
+			   end		
+			end
+			
+			fun{FindIfTrainer PP List} %PP liste des positions possibles et List la liste des trainers
+			   case List of nil then is(boolean:false trainer:_)
+			   []H|T then
+			      local State in
+				 if H==ThisTrainer then {FindIfTrainer PP T}
+				 else 
+				    {Send H getState(State)}
+				    if{FindIfIn State.positionX State.positionY PP} then is(boolean:true trainer:H)
+				    else {FindIfTrainer PP T} end
+				 end
 			      end
 			   end
 			end
+			
+			Result={FindIfTrainer ['#'(x:NewX+1 y:NewY) '#'(x:NewX-1 y:NewY) '#'(x:NewX y:NewY+1) '#'(x:NewX y:NewY-1)] Trainers}
+			if(Result.boolean) then Boolean = true
+			   {Send Result.trainer setBusy(true)} Enemy=Result.trainer trainer(name:State.name positionX:NewX
+											    positionY:NewY pokemon:State.pokemon busy:true) % il y a un trainer a cote
+			elseif(({OS.rand} mod 100) < 30) then  Boolean = true Enemy = {GenerateRandomPokemon}
+			   trainer(name:State.name positionX:NewX
+				   positionY:NewY pokemon:State.pokemon busy:true)
+			else Boolean = false  trainer(name:State.name positionX:NewX
+						      positionY:NewY pokemon:State.pokemon busy:false)end %rien du tout 
 		     end
-	       
-		     Result={FindIfTrainer ['#'(x:NewX+1 y:NewY) '#'(x:NewX-1 y:NewY) '#'(x:NewX y:NewY+1) '#'(x:NewX y:NewY-1)] Trainers}
-		     {Browse 'before second'}
-		     if(Result.boolean) then Boolean = true Enemy=Result.trainer trainer(name:State.name positionX:NewX
-											 positionY:NewY pokemon:State.pokemon ) % il y a un trainer a cote
-		     elseif(({OS.rand} mod 100) < 30) then  Boolean = true Enemy = {GenerateRandomPokemon}
-			trainer(name:State.name positionX:NewX
-				positionY:NewY pokemon:State.pokemon )
-		     else Boolean = false  trainer(name:State.name positionX:NewX
-						   positionY:NewY pokemon:State.pokemon )end %rien du tout 
 		  end
 	       end
-	    end
+	 end
       []fight(EnemyObject) then
 	 local Enemy in
 	    {Send EnemyObject getState(Enemy)}
-	    case Enemy of trainer(name:Name pokemon:PokemonEnemy positionX:X positionY:Y ) then local Winner in Winner = {Fight State.pokemon PokemonEnemy} end  State
+	    case Enemy of trainer(name:Name pokemon:PokemonEnemy positionX:X positionY:Y busy:Busy) then local Winner in Winner = {Fight State.pokemon PokemonEnemy} end  State
 	    [] pokemon(name:Name type:Type lx:Lx xp:Xp hp:Hp) then	  
 	       local Winner = {Fight State.pokemon EnemyObject} in  State end      
 	    end
 	 end
-      end
+      end   
    end
-
+   
 %permet d'envoyer des moveTrainer(ObjectTrainer) à la carte
    proc{MoveTrainersMap Trainer}
       local
 	 NewList     
 	 proc{Loop}
 	    {Delay (10-Speed)*200}
-	    local Move = move(dir:_ boolean:_ enemy:_ trainer:Trainer) Random in
+	    local Move = move(dir:_ boolean:_ enemy:_ trainer:Trainer free:_) Random State in
 	       Random  = ({OS.rand} mod 100 )
 	       if Random < 25 then Move.dir = 'up'
 	       elseif Random <50 then Move.dir = 'right'
@@ -271,7 +275,10 @@ in
 	       else Move.dir = 'left'
 	       end
 	       {Send Trainer Move}
-	       {Browse 'ilabouge'}
+	       if Move.boolean then Move.free=false
+	       else skip end
+	       {Send Trainer getState(State)}
+	       {Browse State}
 	       {Loop}
 	    end
 	 end

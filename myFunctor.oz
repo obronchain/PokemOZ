@@ -50,7 +50,7 @@ define
    end
    
    proc{HandelFight Move}
-      local EnemyObject Enemy
+      local EnemyObject Enemy WaitVal
       in
 	 EnemyObject = Move.enemy
 	 {Send EnemyObject getState(Enemy)}
@@ -60,34 +60,40 @@ define
 	       Desc
 	    in 
 	       Desc = td( label(text:"you find a wild pokemon")
-			  button(text:"show enemy's pokemon" action:proc{$}{ShowPokemon EnemyObject "wildPokemon"} end)
-			  button(text:"Fight" action:proc{$} {Send Player fight(EnemyObject)} end)
-			  button(text:"Run" action:toplevel#close)
+			  button(text:"show enemy's pokemon" action:proc{$}{ShowPokemon EnemyObject "wild Pokemon"} end)
+			  button(text:"Fight" action:proc{$} {Send Player fight(EnemyObject)} WaitVal=unit end)
+			  button(text:"Run" action:proc{$} WaitVal=unit end)
 			)
 	       {{QTk.build Desc} show}
-	       
+	       {Wait WaitVal}
+	       {Send Player setBusy(false)}
 	    end
-	 []trainer(name:Name pokemon:Pokemon positionX:PosX positionY:PosY) then
+	 []trainer(name:Name pokemon:Pokemon positionX:PosX positionY:PosY busy:Busy) then
 	    local
 	       Desc = td( label(text:"you find another trainer")
 			  button(text:"ShowEnemyPokemon" action:proc{$} {ShowPokemon Pokemon "enemy s pokemon"} end)
-			  button(text:"BeginFight" action:proc{$} {Send Player fight(EnemyObject)}end)
+			  button(text:"BeginFight" action:proc{$} {Send Player fight(EnemyObject)} WaitVal=unit end)
 			  button(text:"Close" action:toplevel#close)
 			)
 	    in
-	       {{QTk.build Desc} show}    
+	       {{QTk.build Desc} show}  
 	    end
+	    {Wait WaitVal}
+	    {Send Move.enemy setBusy(false)}
+	    {Send Player setBusy(false)}
 	 end
+	 {Browse 'EndOfHandelFight'}
       end
    end
       
    proc{HandelMove Dir}
       local
-	 Move=move(dir:Dir enemy:_ boolean:_ trainer:Player) State
+	 Move=move(dir:Dir enemy:_ boolean:_ trainer:Player free:_) State
       in
 	 {Send Player Move}
 	 {Browse Move.boolean}
 	 if Move.boolean then
+	    {Browse Move}
 	    {HandelFight Move}
 	 else
 	    skip
