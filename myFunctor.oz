@@ -11,6 +11,7 @@ define
    Map = PokemOZ.map
    PokemozBehaviour = PokemOZ.pokemozBehaviour
    NewPortObject = PokemOZ.newPortObject
+   
    proc{ShowPokemon Pokemon Label}
       local
 	 Desc
@@ -81,9 +82,11 @@ define
       
    proc{HandelMove Dir}
       local
-	 Move=move(dir:Dir enemy:_ boolean:_) State
+	 Move=move(dir:Dir enemy:_ boolean:_ trainer:Player) State
       in
 	 {Send Player Move}
+	 {Browse 'afterMove'}
+	 {Browse Move.boolean}
 	 if Move.boolean then
 	    {HandelFight Move.enemy}
 	 else
