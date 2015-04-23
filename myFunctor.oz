@@ -11,6 +11,35 @@ define
    Map = PokemOZ.map
    PokemozBehaviour = PokemOZ.pokemozBehaviour
    NewPortObject = PokemOZ.newPortObject
+   ImageWidth=60
+   GrassGood = {QTk.newImage photo(url:'Images/grassgood.gif' height:0 width:0)}
+   GrassBad = {QTk.newImage photo(url:'Images/grassbad.gif' height:0 width:0)}
+   proc{ShowMap} 
+      local
+	 Height={Record.width Map $}
+	 Width={Record.width Map.1 $}
+	 C
+	 Desc=canvas(handle:C width:Width*ImageWidth height:Height*ImageWidth)
+	 proc{CreateCanvas X Y}
+	    if X>Width then {CreateCanvas 1 Y+1}
+	    else if Y>Height then skip
+		 else if Map.Y.X==0 then {CreateGrassGood X Y} {CreateCanvas X+1 Y}
+		      else {CreateGrassBad X Y}  {CreateCanvas X+1 Y}
+		      end
+		 end
+	    end
+	 end
+	 proc{CreateGrassGood X Y}
+	    {C create(image (X-1)*ImageWidth (Y-1)*ImageWidth anchor:nw image:GrassGood)}
+	 end
+	 proc{CreateGrassBad X Y}
+	    {C create(image (X-1)*ImageWidth (Y-1)*ImageWidth anchor:nw image:GrassBad)}
+	 end
+      in
+	 {{QTk.build td(Desc)} show}
+	 {CreateCanvas 1 1}
+      end
+   end
    proc{ShowPokemon Pokemon Label}
       local
 	 Desc
@@ -103,4 +132,5 @@ define
 in
    {Init}
    {{QTk.build Desc} show}
+   {ShowMap}
 end
