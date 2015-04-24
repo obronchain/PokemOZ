@@ -7,6 +7,7 @@ define
    Player = PokemOZ.player
    Browse = PokemOZ.browse
    Trainers = PokemOZ.trainers
+   MoveBuffer = PokemOZ.moveBuffer
    PokemonPlayer = PokemOZ.pokemonPlayer
    Init = PokemOZ.init
    Map = PokemOZ.map
@@ -116,7 +117,7 @@ define
       local
 	 Move=move(dir:Dir enemy:_ boolean:_ trainer:Player) State
       in
-	 {Send Player Move}
+	 {Send MoveBuffer moveBuffer(trainer:Player moveCommand:Move)}
 	 {Browse Move.boolean}
 	 if Move.boolean then
 	    {Browse Move}

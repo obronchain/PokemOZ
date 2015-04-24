@@ -18,6 +18,8 @@ export
    CreateGrassBad
    C
    ImageWidth
+   MoveBufferBehaviour
+   MoveBuffer
 define
    ImageWidth=60
    GrassGood = {QTk.newImage photo(url:'Images/grassgood.gif' height:0 width:0)}
@@ -26,7 +28,6 @@ define
    SachaDown = {QTk.newImage photo(url:'Images/sachadown.gif' height:0 width:0)}
    SachaRight = {QTk.newImage photo(url:'Images/sacharight.gif' height:0 width:0)}
    SachaUp = {QTk.newImage photo(url:'Images/sachaup.gif' height:0 width:0)}
-   
    C %canvas
    proc{CreateGrassGood X Y}
       {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:GrassGood)}
@@ -44,6 +45,14 @@ define
       [] 'left' then {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:SachaLeft)}
       end	 
    end
+
+   fun{MoveBufferBehaviour Msg State}
+      case Msg of moveBuffer(trainer: Trainer moveCommand:Move)
+      then {Send Trainer Move} {Wait Move.boolean} State
+      end
+   end
+
+   MoveBuffer
    MapObject
    MapBehaviour
    Speed
@@ -147,7 +156,10 @@ in
       local  EnemyPokemon Loop in
 	 PokemonPlayer = {NewPortObject PokemozBehaviour pokemon(name:mapute type:grass hp:20 lx:5 xp:0)}
 	 Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0 busy:false)}
-	 Trainers = [Player {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}]
+	 Trainers = [Player {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
+		     {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
+		     {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
+		    ]
 	 proc{Loop L}
 	    case L of nil then skip
 	    []H|T then if (H==Player) then {Loop T}
@@ -157,6 +169,7 @@ in
 	 end
 	 {Loop Trainers}
 	 MapObject = {NewPortObject MapBehaviour map(trainers:Trainers)}
+	 MoveBuffer = {NewPortObject MoveBufferBehaviour move(_)}
       end
    end
      
@@ -323,7 +336,7 @@ in
 	       elseif Random <75 then Move.dir = 'down'
 	       else Move.dir = 'left'
 	       end
-	       {Send Trainer Move}
+	       {Send MoveBuffer moveBuffer(trainer:Trainer moveCommand:Move)}
 	       if Move.boolean then Move.free=false
 	       else skip end
 	       {Send MapObject refresh(trainer:Trainer dir:Move.dir oldX:State.positionX oldY:State.positionY)}
