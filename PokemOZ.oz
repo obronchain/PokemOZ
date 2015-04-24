@@ -308,6 +308,7 @@ in
 	    {Delay (10-Speed)*200}
 	    local Move = move(dir:_ boolean:_ enemy:_ trainer:Trainer ) Random State in
 	       Random  = ({OS.rand} mod 100 )
+	       {Send Trainer getState(State)}
 	       if Random < 25 then Move.dir = 'up'
 	       elseif Random <50 then Move.dir = 'right'
 	       elseif Random <75 then Move.dir = 'down'
@@ -316,8 +317,7 @@ in
 	       {Send Trainer Move}
 	       if Move.boolean then Move.free=false
 	       else skip end
-	       {Send Trainer getState(State)}
-	       {Browse State}
+	       {Send MapObject refresh(trainer:Trainer dir:Move.dir oldX:State.positionX oldY:State.positionY)}
 	       {Loop}
 	    end
 	 end
