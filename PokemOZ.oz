@@ -25,10 +25,10 @@ define
    SachaLeft = {QTk.newImage photo(url:'Images/sachaleft.gif' height:0 width:0)}
    C %canvas
    proc{CreateGrassGood X Y}
-      {C create(image (X-1)*ImageWidth (Y-1)*ImageWidth anchor:nw image:GrassGood)}
+      {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:GrassGood)}
    end
    proc{CreateGrassBad X Y}
-      {C create(image (X-1)*ImageWidth (Y-1)*ImageWidth anchor:nw image:GrassBad)}
+      {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:GrassBad)}
    end
    
    proc{CreatePerso Dir X Y}
@@ -60,7 +60,7 @@ in
       case Msg of
 	 refresh(trainer:Trainer dir:Dir oldX:OldX oldY:OldY) then
 	 local StateTrainer in {Send Trainer getState(StateTrainer)}
-	    if Map.OldY.OldX==0 then {CreateGrassGood OldX OldY}
+	    if Map.(OldY+1).(OldX+1)==0 then {CreateGrassGood OldX OldY}
 	    else {CreateGrassBad OldX OldY} end
 	    {CreatePerso Dir StateTrainer.positionX StateTrainer.positionY}
 	 end

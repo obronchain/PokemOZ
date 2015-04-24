@@ -20,13 +20,13 @@ define
 
    proc{ShowMap} 
       local
-	 Height={Record.width Map $}
-	 Width={Record.width Map.1 $}
+	 Height={Record.width Map $} -1 
+	 Width={Record.width Map.1 $} -1
 	 Desc=canvas(handle:C width:Width*ImageWidth height:Height*ImageWidth)
 	 proc{CreateCanvas X Y}
-	    if X>Width then {CreateCanvas 1 Y+1}
+	    if X>Width then {CreateCanvas 0 Y+1}
 	    else if Y>Height then skip
-		 else if Map.Y.X==0 then {CreateGrassGood X Y} {CreateCanvas X+1 Y}
+		 else if Map.(Y+1).(X+1)==0 then {CreateGrassGood X Y} {CreateCanvas X+1 Y}
 		      else {CreateGrassBad X Y}  {CreateCanvas X+1 Y}
 		      end
 		 end
@@ -34,7 +34,7 @@ define
 	 end
       in
 	 {{QTk.build td(Desc)} show}
-	 {CreateCanvas 1 1}
+	 {CreateCanvas 0 0}
       end
    end
    
@@ -129,16 +129,21 @@ define
       end
    end
    
-   Desc = td(button(text:"up" action:proc{$}{HandelMove 'up'} end )
-	     button(text:"down" action:proc{$}{HandelMove 'down'} end)
-	     button(text:"left"  action:proc{$}{HandelMove 'left'}end )
-	     button(text:"right" action:proc{$}{HandelMove 'right'} {Send MapObject refresh(trainer:Player dir:'right' oldX:1 oldY:1)}end )
+   Desc = td(button(text:"up" action:proc{$}{MovingButton 'up'} end)
+	     button(text:"down" action:proc{$}{MovingButton 'down'} end)
+	     button(text:"left"  action:proc{$}{MovingButton 'left'}end )
+	     button(text:"right" action:proc{$}{MovingButton 'right'}end )
 	     button(text:"Show My Pokemon" action:proc{$} {ShowPokemon PokemonPlayer "MyPokemon"} end )
 	    )
+   proc{MovingButton Dir}
+      local StateTrainer in
+	 {Send Player getState(StateTrainer)}
+	 {HandelMove Dir}
+	 {Send MapObject refresh(trainer:Player dir:Dir oldX:StateTrainer.positionX oldY:StateTrainer.positionY)}
+      end
+   end
 in
-   {Browse 'ok1'}
    {Init}
    {{QTk.build Desc} show}
    {ShowMap}
-   {Browse 'oktamere'}
 end
