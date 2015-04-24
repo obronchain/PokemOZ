@@ -33,8 +33,14 @@ define
 		 end
 	    end
 	 end
+	 Window
       in
-	 {{QTk.build td(Desc)} show}
+	 Window = {QTk.build td(Desc)}
+	 {Window bind(event:"<Up>" action:proc{$} {MovingButton 'up'} end)}
+	 {Window bind(event:"<Down>" action:proc{$} {MovingButton 'down'} end)}
+	 {Window bind(event:"<Left>" action:proc{$} {MovingButton 'left'} end)}
+	 {Window bind(event:"<Right>" action:proc{$} {MovingButton 'right'} end)}
+	 {Window show}
 	 {CreateCanvas 0 0}
       end
    end
@@ -129,12 +135,6 @@ define
       end
    end
    
-   Desc = td(button(text:"up" action:proc{$}{MovingButton 'up'} end)
-	     button(text:"down" action:proc{$}{MovingButton 'down'} end)
-	     button(text:"left"  action:proc{$}{MovingButton 'left'}end )
-	     button(text:"right" action:proc{$}{MovingButton 'right'}end )
-	     button(text:"Show My Pokemon" action:proc{$} {ShowPokemon PokemonPlayer "MyPokemon"} end )
-	    )
    proc{MovingButton Dir}
       local StateTrainer in
 	 {Send Player getState(StateTrainer)}
@@ -144,6 +144,5 @@ define
    end
 in
    {Init}
-   {{QTk.build Desc} show}
    {ShowMap}
 end
