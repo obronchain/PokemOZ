@@ -11,6 +11,7 @@ export
    Map
    PokemozBehaviour
    NewPortObject
+   Trainers
 define
    Speed
    IsFreePositionFor
@@ -63,7 +64,7 @@ in
 		  end
       end
    end
-   
+
    fun{GenerateRandomPokemon}
       local Pokemon InitialValue = pokemon(name:_ type:_ lx:_ hp:_ xp:_) Level State Loop Random in
 	 {Send PokemonPlayer getState(State)}

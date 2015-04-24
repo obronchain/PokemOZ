@@ -12,6 +12,7 @@ define
    Map = PokemOZ.map
    PokemozBehaviour = PokemOZ.pokemozBehaviour
    NewPortObject = PokemOZ.newPortObject
+   MapObject = {NewPortObject MapBehaviour mapObject(canvas:C map:Map)} 
    ImageWidth=60
    GrassGood = {QTk.newImage photo(url:'Images/grassgood.gif' height:0 width:0)}
    GrassBad = {QTk.newImage photo(url:'Images/grassbad.gif' height:0 width:0)}
@@ -25,7 +26,8 @@ define
    end
    
    proc{CreatePerso Dir X Y}
-      {C create(image (X-1)*ImageWidth (Y-1)*ImageWidth anchor:nw image:SachaLeft)}
+      {Browse 'inCreatePerso'}
+      {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:SachaLeft)}
    end
 	    
    
@@ -147,19 +149,21 @@ define
 	 local StateTrainer in {Send Trainer getState(StateTrainer)}
 	    if Map.OldY.OldX==0 then {CreateGrassGood OldX OldY}
 	    else {CreateGrassBad OldX OldY} end
-	    {CreatePerso Dir State.positionX State.positionY}
+	    {CreatePerso Dir StateTrainer.positionX StateTrainer.positionY}
 	 end
       end
       State
    end
+   
    Desc = td(button(text:"up" action:proc{$}{HandelMove 'up'} end )
 	     button(text:"down" action:proc{$}{HandelMove 'down'} end)
 	     button(text:"left"  action:proc{$}{HandelMove 'left'}end )
-	     button(text:"right" action:proc{$}{HandelMove 'right'}end )
+	     button(text:"right" action:proc{$}{HandelMove 'right'} {Send MapObject refresh(trainer:Player dir:'right' oldX:1 oldY:1)}end )
 	     button(text:"Show My Pokemon" action:proc{$} {ShowPokemon PokemonPlayer "MyPokemon"} end )
 	    )
 in
    {Init}
    {{QTk.build Desc} show}
    {ShowMap}
+   {CreatePerso 'up' 1 1}
 end
