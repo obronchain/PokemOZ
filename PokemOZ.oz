@@ -194,7 +194,7 @@ in
       case Msg of
 	 getState(X) then X = State State
 	 []setBusy(S) then {Browse  'setBusy'} {Browse S} trainer(name:State.name pokemon:State.pokemon positionX:State.positionX positionY:State.positionY busy:S)
-      []move(dir:Dir boolean:Boolean enemy:Enemy trainer:ThisTrainer free:Free) then %Enemy est soit un portObject trainer soit un tuple pokemon
+      []move(dir:Dir boolean:Boolean enemy:Enemy trainer:ThisTrainer ) then %Enemy est soit un portObject trainer soit un tuple pokemon
 	 if State.busy then Boolean=false State
 	 else  local NewX NewY in
 		  {Browse 'matchMove'}
@@ -267,7 +267,7 @@ in
 	 NewList     
 	 proc{Loop}
 	    {Delay (10-Speed)*200}
-	    local Move = move(dir:_ boolean:_ enemy:_ trainer:Trainer free:_) Random State in
+	    local Move = move(dir:_ boolean:_ enemy:_ trainer:Trainer ) Random State in
 	       Random  = ({OS.rand} mod 100 )
 	       if Random < 25 then Move.dir = 'up'
 	       elseif Random <50 then Move.dir = 'right'

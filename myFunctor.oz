@@ -11,7 +11,6 @@ define
    Map = PokemOZ.map
    PokemozBehaviour = PokemOZ.pokemozBehaviour
    NewPortObject = PokemOZ.newPortObject
-<<<<<<< HEAD
    ImageWidth=60
    GrassGood = {QTk.newImage photo(url:'Images/grassgood.gif' height:0 width:0)}
    GrassBad = {QTk.newImage photo(url:'Images/grassbad.gif' height:0 width:0)}
@@ -41,9 +40,7 @@ define
 	 {CreateCanvas 1 1}
       end
    end
-=======
    
->>>>>>> f9b1bb854d11cec77c00358333f10568ab8e391d
    proc{ShowPokemon Pokemon Label}
       local
 	 Desc
@@ -120,7 +117,7 @@ define
       
    proc{HandelMove Dir}
       local
-	 Move=move(dir:Dir enemy:_ boolean:_ trainer:Player free:_) State
+	 Move=move(dir:Dir enemy:_ boolean:_ trainer:Player) State
       in
 	 {Send Player Move}
 	 {Browse Move.boolean}
