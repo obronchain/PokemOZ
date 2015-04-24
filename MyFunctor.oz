@@ -120,8 +120,7 @@ define
 	 {Send MoveBuffer moveBuffer(trainer:Player moveCommand:Move)}
 	 {Browse Move.boolean}
 	 if Move.boolean then
-	    {Browse Move}
-	    {HandelFight Move}
+	    thread {HandelFight Move} end
 	 else
 	    skip
 	 end
