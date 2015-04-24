@@ -32,8 +32,8 @@ define
 in
    Speed = 0
    Browse = Browser.browse
-   Map = column(line(0 0 0 0 0 0 0)
-		line(0 0 0 0 0 0 0)
+   Map = column(line(1 1 0 0 0 0 0)
+		line(1 1 0 0 0 0 0)
 		line(0 0 0 0 0 0 0)
 		line(0 0 0 0 0 0 0)
 		line(0 0 0 0 0 0 0)
@@ -241,7 +241,7 @@ in
 			if(Result.boolean) then Boolean = true
 			   {Send Result.trainer setBusy(true)} Enemy=Result.trainer trainer(name:State.name positionX:NewX
 											    positionY:NewY pokemon:State.pokemon busy:true) % il y a un trainer a cote
-			elseif(({OS.rand} mod 100) < 30) then  Boolean = true Enemy = {GenerateRandomPokemon}
+			elseif{And (({OS.rand} mod 100) < 30) Map.(NewY+1).(NewX+1)==1} then  Boolean = true Enemy = {GenerateRandomPokemon}
 			   trainer(name:State.name positionX:NewX
 				   positionY:NewY pokemon:State.pokemon busy:true)
 			else Boolean = false  trainer(name:State.name positionX:NewX
