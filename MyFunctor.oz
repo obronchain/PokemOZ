@@ -20,12 +20,12 @@ define
 
    proc{ShowMap} 
       local
-	 Height={Record.width Map $} -1 
-	 Width={Record.width Map.1 $} -1
+	 Height={Record.width Map $}
+	 Width={Record.width Map.1 $} 
 	 Desc=canvas(handle:C width:Width*ImageWidth height:Height*ImageWidth)
 	 proc{CreateCanvas X Y}
-	    if X>Width then {CreateCanvas 0 Y+1}
-	    else if Y>Height then skip
+	    if X==Width then {CreateCanvas 0 Y+1}
+	    else if Y==Height then skip
 		 else if Map.(Y+1).(X+1)==0 then {CreateGrassGood X Y} {CreateCanvas X+1 Y}
 		      else {CreateGrassBad X Y}  {CreateCanvas X+1 Y}
 		      end

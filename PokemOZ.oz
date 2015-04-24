@@ -23,6 +23,10 @@ define
    GrassGood = {QTk.newImage photo(url:'Images/grassgood.gif' height:0 width:0)}
    GrassBad = {QTk.newImage photo(url:'Images/grassbad.gif' height:0 width:0)}
    SachaLeft = {QTk.newImage photo(url:'Images/sachaleft.gif' height:0 width:0)}
+   SachaDown = {QTk.newImage photo(url:'Images/sachadown.gif' height:0 width:0)}
+   SachaRight = {QTk.newImage photo(url:'Images/sacharight.gif' height:0 width:0)}
+   SachaUp = {QTk.newImage photo(url:'Images/sachaup.gif' height:0 width:0)}
+   
    C %canvas
    proc{CreateGrassGood X Y}
       {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:GrassGood)}
@@ -33,7 +37,12 @@ define
    
    proc{CreatePerso Dir X Y}
       {Browse 'inCreatePerso'}
-      {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:SachaLeft)}
+      case Dir of
+	 'up' then {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:SachaUp)}
+      []'down' then {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:SachaDown)}
+      [] 'right' then {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:SachaRight)}
+      [] 'left' then {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:SachaLeft)}
+      end	 
    end
    MapObject
    MapBehaviour
@@ -69,12 +78,12 @@ in
    end
    Speed = 0
    Browse = Browser.browse
-   Map = column(line(1 1 0 0 0 0 0)
+   Map = column(line(1 1 0 0 1 1 0)
 		line(1 1 0 0 0 0 0)
 		line(0 0 0 0 0 0 0)
 		line(0 0 0 0 0 0 0)
-		line(0 0 0 0 0 0 0)
-		line(0 0 0 0 0 0 0)
+		line(1 0 0 0 0 0 0)
+		line(1 0 0 0 0 0 0)
 		line(0 0 0 0 0 0 0)
 	       )
    LevelList = level(
