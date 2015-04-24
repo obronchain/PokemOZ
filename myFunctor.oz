@@ -6,6 +6,7 @@ import
 define
    Player = PokemOZ.player
    Browse = PokemOZ.browse
+   Trainers = PokemOZ.trainers
    PokemonPlayer = PokemOZ.pokemonPlayer
    Init = PokemOZ.init
    Map = PokemOZ.map
@@ -14,11 +15,24 @@ define
    ImageWidth=60
    GrassGood = {QTk.newImage photo(url:'Images/grassgood.gif' height:0 width:0)}
    GrassBad = {QTk.newImage photo(url:'Images/grassbad.gif' height:0 width:0)}
+   SachaLeft = {QTk.newImage photo(url:'Images/sachaleft.gif' height:0 width:0)}
+   C %canvas
+   proc{CreateGrassGood X Y}
+      {C create(image (X-1)*ImageWidth (Y-1)*ImageWidth anchor:nw image:GrassGood)}
+   end
+   proc{CreateGrassBad X Y}
+      {C create(image (X-1)*ImageWidth (Y-1)*ImageWidth anchor:nw image:GrassBad)}
+   end
+   
+   proc{CreatePerso Dir X Y}
+      {C create(image (X-1)*ImageWidth (Y-1)*ImageWidth anchor:nw image:SachaLeft)}
+   end
+	    
+   
    proc{ShowMap} 
       local
 	 Height={Record.width Map $}
 	 Width={Record.width Map.1 $}
-	 C
 	 Desc=canvas(handle:C width:Width*ImageWidth height:Height*ImageWidth)
 	 proc{CreateCanvas X Y}
 	    if X>Width then {CreateCanvas 1 Y+1}
@@ -28,12 +42,6 @@ define
 		      end
 		 end
 	    end
-	 end
-	 proc{CreateGrassGood X Y}
-	    {C create(image (X-1)*ImageWidth (Y-1)*ImageWidth anchor:nw image:GrassGood)}
-	 end
-	 proc{CreateGrassBad X Y}
-	    {C create(image (X-1)*ImageWidth (Y-1)*ImageWidth anchor:nw image:GrassBad)}
 	 end
       in
 	 {{QTk.build td(Desc)} show}
@@ -131,7 +139,19 @@ define
 	 {Browse State}
       end
    end
-	 
+
+   fun{MapBehaviour Msg State}
+      % mapObject( map:Map canvas:Canvas)
+      case Msg of
+	 refresh(trainer:Trainer dir:Dir oldX:OldX oldY:OldY) then
+	 local StateTrainer in {Send Trainer getState(StateTrainer)}
+	    if Map.OldY.OldX==0 then {CreateGrassGood OldX OldY}
+	    else {CreateGrassBad OldX OldY} end
+	    {CreatePerso Dir State.positionX State.positionY}
+	 end
+      end
+      State
+   end
    Desc = td(button(text:"up" action:proc{$}{HandelMove 'up'} end )
 	     button(text:"down" action:proc{$}{HandelMove 'down'} end)
 	     button(text:"left"  action:proc{$}{HandelMove 'left'}end )
