@@ -1,6 +1,7 @@
 functor
 import
    System
+   QTk at 'x-oz://system/wp/QTk.ozf'
    OS
    Browser
 export
@@ -10,13 +11,35 @@ export
    PokemonPlayer
    Map
    PokemozBehaviour
+   MapObject
    NewPortObject
    Trainers
+   CreateGrassGood
+   CreateGrassBad
+   C
+   ImageWidth
 define
+   ImageWidth=60
+   GrassGood = {QTk.newImage photo(url:'Images/grassgood.gif' height:0 width:0)}
+   GrassBad = {QTk.newImage photo(url:'Images/grassbad.gif' height:0 width:0)}
+   SachaLeft = {QTk.newImage photo(url:'Images/sachaleft.gif' height:0 width:0)}
+   C %canvas
+   proc{CreateGrassGood X Y}
+      {C create(image (X-1)*ImageWidth (Y-1)*ImageWidth anchor:nw image:GrassGood)}
+   end
+   proc{CreateGrassBad X Y}
+      {C create(image (X-1)*ImageWidth (Y-1)*ImageWidth anchor:nw image:GrassBad)}
+   end
+   
+   proc{CreatePerso Dir X Y}
+      {Browse 'inCreatePerso'}
+      {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:SachaLeft)}
+   end
+   MapObject
+   MapBehaviour
    Speed
    IsFreePositionFor
    NewPortObject
-   MapObject
    PokemozBehaviour
    Map
    Fight
@@ -31,6 +54,19 @@ define
    PokemonNameList
    MoveTrainersMap
 in
+   
+   fun{MapBehaviour Msg State}
+      % mapObject( map:Map canvas:Canvas)
+      case Msg of
+	 refresh(trainer:Trainer dir:Dir oldX:OldX oldY:OldY) then
+	 local StateTrainer in {Send Trainer getState(StateTrainer)}
+	    if Map.OldY.OldX==0 then {CreateGrassGood OldX OldY}
+	    else {CreateGrassBad OldX OldY} end
+	    {CreatePerso Dir StateTrainer.positionX StateTrainer.positionY}
+	 end
+      end
+      State
+   end
    Speed = 0
    Browse = Browser.browse
    Map = column(line(1 1 0 0 0 0 0)
@@ -98,6 +134,7 @@ in
 %Le classe PortObject
 %On rajoute dans les trainers l'etat busy. cet etat permet de voir si il est occupe et ou si non. busy si est en combat. 
    proc{Init}
+      {Browse 'init'}
       local  EnemyPokemon Loop in
 	 PokemonPlayer = {NewPortObject PokemozBehaviour pokemon(name:mapute type:grass hp:20 lx:5 xp:0)}
 	 Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0 busy:false)}
@@ -110,6 +147,7 @@ in
 	    end
 	 end
 	 {Loop Trainers}
+	 MapObject = {NewPortObject MapBehaviour map(trainers:Trainers)}
       end
    end
      

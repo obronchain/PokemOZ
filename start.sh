@@ -1,4 +1,4 @@
 #! 
 ozc -c PokemOZ.oz
-ozc -c myFunctor.oz
-ozengine myFunctor.ozf
+ozc -c MyFunctor.oz
+ozengine MyFunctor.ozf
