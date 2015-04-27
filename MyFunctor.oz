@@ -4,6 +4,7 @@ import
    PokemOZ at 'PokemOZ.ozf'
    System
 define
+   GrassGood = PokemOZ.grassGood
    Player = PokemOZ.player
    Browse = PokemOZ.browse
    Trainers = PokemOZ.trainers
@@ -72,21 +73,34 @@ define
    
    % Permet de gerer l'interface graphique pour les combats. Que ce soit avec un autre entraineur ou un autre pokemon
    proc{HandelFight Move}
-      local EnemyObject Enemy WaitVal
+      local EnemyObject Enemy WaitVal ImageWidth ImageHeight CanvaHeight CanvaWidth Ca
       in
 	 EnemyObject = Move.enemy
 	 {Send EnemyObject getState(Enemy)}
+	 ImageWidth = 30
+	 ImageHeight = 30
+	 CanvaWidth = 5
+	 CanvaHeight = 5
 	 case Enemy of
 	    pokemon(name:Name type:Type lx:Lx hp:Hp xp:Xp) then
 	    local
 	       Desc
 	    in 
-	       Desc = td( label(text:"you find a wild pokemon")
-			  button(text:"show enemy's pokemon" action:proc{$}{ShowPokemon EnemyObject "wild Pokemon"} end)
-			  button(text:"Fight" action:proc{$} {Send Player fight(EnemyObject)} WaitVal=unit end)
-			  button(text:"Run" action:proc{$} WaitVal=unit end)
-			)
-	       {{QTk.build Desc} show}
+	      % Desc = td( label(text:"you find a wild pokemon")
+	      % button(text:"show enemy's pokemon" action:proc{$}{ShowPokemon EnemyObject "wild Pokemon"} end)
+	      %		  button(text:"Fight" action:proc{$} {Send Player fight(EnemyObject)} WaitVal=unit end)
+	      %	  button(text:"Run" action:proc{$} WaitVal=unit end)
+	      %		)
+	       
+	       Desc=td(canvas(handle:Ca width:CanvaWidth*ImageWidth height:CanvaHeight*ImageWidth)
+		       button(text:"show enemy's pokemon" action:proc{$}{ShowPokemon EnemyObject "wild Pokemon"} end)
+		       button(text:"Fight" action:proc{$} {Send Player fight(EnemyObject)} WaitVal=unit end)
+		       button(text:"Run" action:proc{$} WaitVal=unit end)
+		       )
+	       {{QTk.build Desc} show}	 
+	       {Ca create(image  (3)*ImageWidth (1)*ImageHeight anchor:nw image:GrassGood)}
+	       {Ca create(image  (1)*ImageWidth (3)*ImageHeight anchor:nw image:GrassGood)}
+
 	       {Wait WaitVal}
 	       {Send Player setBusy(false)}
 	    end
@@ -94,7 +108,7 @@ define
 	    local
 	       Desc = td( label(text:"you find another trainer")
 			  button(text:"ShowEnemyPokemon" action:proc{$} {ShowPokemon Pokemon "enemy s pokemon"} end)
-			  button(text:"BeginFight" action:proc{$} {Send Player fight(EnemyObject)} WaitVal=unit end)
+			  button(text:"BeginFight" action:proc{$} {Send Player fight(EnemyObject)} WaitVal=unit  end)
 			  button(text:"Close" action:toplevel#close)
 			)
 	    in

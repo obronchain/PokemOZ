@@ -20,6 +20,7 @@ export
    ImageWidth
    MoveBufferBehaviour
    MoveBuffer
+   GrassGood
 define
    ImageWidth=60
    GrassGood = {QTk.newImage photo(url:'Images/grassgood.gif' height:0 width:0)}
@@ -93,7 +94,7 @@ in
       State
    end
    
-   Speed = 9
+   Speed = 1
    Browse = Browser.browse
    Map = column(line(1 1 0 0 1 1 0)
 		line(1 1 0 0 0 0 0)
@@ -114,6 +115,7 @@ in
 				 n(name:bulbizare type:grass)
 				 n(name:salameche type:fire)
 				)
+   
    % regarde si la position PosiX PosiY est libre pour Trainer en prenant la liste de tous les entrainers L
    fun{IsFreePositionFor Trainer L PosiX PosiY}
       case L of nil then true
