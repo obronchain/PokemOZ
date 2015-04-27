@@ -29,13 +29,18 @@ define
    SachaRight = {QTk.newImage photo(url:'Images/sacharight.gif' height:0 width:0)}
    SachaUp = {QTk.newImage photo(url:'Images/sachaup.gif' height:0 width:0)}
    C %canvas
+
+   % cree l'image avec de herbes basses
    proc{CreateGrassGood X Y}
       {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:GrassGood)}
    end
+
+   % herbes hautes
    proc{CreateGrassBad X Y}
       {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:GrassBad)}
    end
-   
+
+   %permet de placer un perso a une position X Y pour qu'il regarde dans la direction Dir
    proc{CreatePerso Dir X Y}
       {Browse 'inCreatePerso'}
       case Dir of
@@ -46,6 +51,7 @@ define
       end	 
    end
 
+   % les Behaviour du buffer pour que les entraineurs changent leurs position 1 par 1
    fun{MoveBufferBehaviour Msg State}
       case Msg of moveBuffer(trainer: Trainer moveCommand:Move)
       then {Send Trainer Move} {Wait Move.boolean} State
@@ -72,7 +78,8 @@ define
    PokemonNameList
    MoveTrainersMap
 in
-   
+
+   % L'objet qui permet de gerer la carte, de la refresh
    fun{MapBehaviour Msg State}
       % mapObject( map:Map canvas:Canvas)
       case Msg of
@@ -85,7 +92,8 @@ in
       end
       State
    end
-   Speed = 0
+   
+   Speed = 9
    Browse = Browser.browse
    Map = column(line(1 1 0 0 1 1 0)
 		line(1 1 0 0 0 0 0)
@@ -106,6 +114,7 @@ in
 				 n(name:bulbizare type:grass)
 				 n(name:salameche type:fire)
 				)
+   % regarde si la position PosiX PosiY est libre pour Trainer en prenant la liste de tous les entrainers L
    fun{IsFreePositionFor Trainer L PosiX PosiY}
       case L of nil then true
       [] H|T then local State in
@@ -118,7 +127,8 @@ in
 		  end
       end
    end
-
+   
+   %Genere un pokemon random
    fun{GenerateRandomPokemon}
       local Pokemon InitialValue = pokemon(name:_ type:_ lx:_ hp:_ xp:_) Level State Loop Random in
 	 {Send PokemonPlayer getState(State)}
@@ -150,16 +160,18 @@ in
 %       fight peut se faire battre un trainer avec un autre trainer ou un autre pokemon
    
 %Le classe PortObject
-%On rajoute dans les trainers l'etat busy. cet etat permet de voir si il est occupe et ou si non. busy si est en combat. 
+%On rajoute dans les trainers l'etat busy. cet etat permet de voir si il est occupe et ou si non. busy si est en combat.
+
+   %init les donnees utiles pour le jeu. Cree le joueur, son pokemon, la list des entraineurs, et lance le thread des autres entraineurs
    proc{Init}
       {Browse 'init'}
       local  EnemyPokemon Loop in
 	 PokemonPlayer = {NewPortObject PokemozBehaviour pokemon(name:mapute type:grass hp:20 lx:5 xp:0)}
 	 Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0 busy:false)}
 	 Trainers = [Player {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
-		     {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
-		     {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
+
 		    ]
+	 
 	 proc{Loop L}
 	    case L of nil then skip
 	    []H|T then if (H==Player) then {Loop T}
@@ -172,7 +184,8 @@ in
 	 MoveBuffer = {NewPortObject MoveBufferBehaviour move(_)}
       end
    end
-     
+
+   
    fun {NewPortObject Behaviour Init}
       proc {MsgLoop S1 State}
 	 case S1 of Msg|S2 then
@@ -186,7 +199,7 @@ in
       {NewPort Sin}
    end
 
-%La fonction qui gere le Port 
+%La fonction qui gere le Port pour les pokemon
    fun{PokemozBehaviour Msg State}
       case Msg of
       %Cette methode est appelee quand on blesse un pokemoz avec un valeur de X
@@ -198,6 +211,7 @@ in
 			end
       %Lie letat du portObject a X
       []getState(X) then X = State State
+	 % soigne le pokemon
       []cure(X) then local
 			NewHp
 			proc{Loop N}
@@ -251,10 +265,13 @@ in
       end
    end
 
+   % la fonction pour le port object du trainer
    fun{TrainerBehaviour Msg State}
       case Msg of
 	 getState(X) then X = State State
-	 []setBusy(S) then {Browse  'setBusy'} {Browse S} trainer(name:State.name pokemon:State.pokemon positionX:State.positionX positionY:State.positionY busy:S)
+	 %permet de dire qu'il est occupe (qu'il est occupe de combattre , le thread du trainer le fait plus bouger)
+      []setBusy(S) then {Browse  'setBusy'} {Browse S} trainer(name:State.name pokemon:State.pokemon positionX:State.positionX positionY:State.positionY busy:S)
+	 % permet de bouger le traineur. boolean dit est liee a true si il y a un combat. Enemy est alors lie a l'enemy a combattre, false sinon pour boolean 
       []move(dir:Dir boolean:Boolean enemy:Enemy trainer:ThisTrainer ) then %Enemy est soit un portObject trainer soit un tuple pokemon
 	 if State.busy then Boolean=false State
 	 else  local NewX NewY in

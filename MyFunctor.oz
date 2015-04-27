@@ -19,6 +19,7 @@ define
    ImageWidth = PokemOZ.imageWidth
    C = PokemOZ.c
 
+   %permet d'afficher la map et de liver les touches aux bouttons aux actions (MovingButton)
    proc{ShowMap} 
       local
 	 Height={Record.width Map $}
@@ -68,20 +69,8 @@ define
       end
    end
 
-   fun{WantToFight}
-      local
-	 Ret
-	 Desc
-      in
-	 Desc = td(button(text:"WantToFight" action:proc{$} Ret = true end)
-		   button(text:"DoNotFight" action:proc{$} Ret = false end)
-		   button(text:"Close" action:toplevel#close)
-		  )
-	 {{QTk.build Desc} show}
-	 Ret
-      end
-   end
    
+   % Permet de gerer l'interface graphique pour les combats. Que ce soit avec un autre entraineur ou un autre pokemon
    proc{HandelFight Move}
       local EnemyObject Enemy WaitVal
       in
@@ -118,15 +107,17 @@ define
 	 {Browse 'EndOfHandelFight'}
       end
    end
-      
+
+   % gerer les mouvements des perso dans le programme.
+   % il y a un buffer qui permet que une seule personne a la fois change sa position
    proc{HandelMove Dir}
       local
 	 Move=move(dir:Dir enemy:_ boolean:_ trainer:Player) State
       in
-	 {Send MoveBuffer moveBuffer(trainer:Player moveCommand:Move)}
+	 {Send MoveBuffer moveBuffer(trainer:Player moveCommand:Move)} %on envoie au buffer qu'on veut bouger
 	 {Browse Move.boolean}
 	 if Move.boolean then
-	    thread {HandelFight Move} end
+	    thread {HandelFight Move} end %si il y a un combat a faire
 	 else
 	    skip
 	 end
@@ -134,7 +125,9 @@ define
 	 {Browse State}
       end
    end
-   
+
+   %permet de gerer les input sur les bouttons en gerer les actions du jeu (HandelMove) mais aussi en
+   %mettant a jour l'interface graphique (resfresh(...))
    proc{MovingButton Dir}
       local StateTrainer in
 	 {Send Player getState(StateTrainer)}
@@ -143,6 +136,6 @@ define
       end
    end
 in
-   {Init}
-   {ShowMap}
+   {Init} %initie toutes les valeurs
+   {ShowMap} %montre la carrte
 end
