@@ -175,7 +175,7 @@ in
 
 
 
-     fun{ChoosePokemon}
+   fun{ChoosePokemon}
       local
 	 Pokemon
 	 Charm
@@ -186,9 +186,9 @@ in
 		   lr(canvas(handle:Charm height:100 width:100 bg:white)
 		      canvas(handle:Ozt height:100 width:100 bg:white)
 		      canvas(handle:Bulb height:100 width:100 bg:white)
-		      )
+		     )
 		   bg:white
-		   )
+		  )
       in
 	 Window= {QTk.build Desc}
 	 {Window show}
@@ -206,7 +206,7 @@ in
 	 else {NewPortObject PokemozBehaviour pokemon(name:"Bulbizarre" type:grass hp:20 lx:5 xp:0)}
 	 end
       end
-     end
+   end
      
    %init les donnees utiles pour le jeu. Cree le joueur, son pokemon, la list des entraineurs, et lance le thread des autres entraineurs
    proc{Init}
@@ -216,7 +216,7 @@ in
 	 %PokemonPlayer = {NewPortObject PokemozBehaviour pokemon(name:mapute type:grass hp:20 lx:5 xp:0)}
 	 Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0 busy:false)}
 	 Trainers = [Player {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
-			]
+		    ]
 	 
 	 proc{Loop L}
 	    case L of nil then skip
@@ -364,27 +364,33 @@ in
 			fun{FindIfTrainer PP List} %PP liste des positions possibles et List la liste des trainers
 			   case List of nil then is(boolean:false trainer:_)
 			   []H|T then
-			      local State in
+			      local State PokemonState in
 				 if H==ThisTrainer then {FindIfTrainer PP T}
 				 else 
 				    {Send H getState(State)}
-				    if {And {FindIfIn State.positionX State.positionY PP} {Not State.busy}} then if {Or ThisTrainer==Player H==Player} then is(boolean:true trainer:H)
-														    else {FindIfTrainer PP T}end
+				    {Send State.pokemon getState(PokemonState)}
+				    if {And {FindIfIn State.positionX State.positionY PP} {And {Not State.busy} {Not PokemonState.hp==0}}} then if {Or ThisTrainer==Player H==Player} then is(boolean:true trainer:H)
+																		else {FindIfTrainer PP T}end
 				    else {FindIfTrainer PP T} end
 				 end
 			      end
 			   end
 			end
+			local ThisPokemonState in {Send State.pokemon getState(ThisPokemonState)}
+			   if ThisPokemonState.hp==0 then Boolean=false trainer(name:State.name positionX:NewX positionY:NewY pokemon:State.pokemon busy:false)
+			   else
+			      Result={FindIfTrainer ['#'(x:NewX+1 y:NewY) '#'(x:NewX-1 y:NewY) '#'(x:NewX y:NewY+1) '#'(x:NewX y:NewY-1)] Trainers} 
 			
-			Result={FindIfTrainer ['#'(x:NewX+1 y:NewY) '#'(x:NewX-1 y:NewY) '#'(x:NewX y:NewY+1) '#'(x:NewX y:NewY-1)] Trainers}
-			if(Result.boolean) then Boolean = true
-			   {Send Result.trainer setBusy(true)} Enemy=Result.trainer trainer(name:State.name positionX:NewX
-											    positionY:NewY pokemon:State.pokemon busy:true) % il y a un trainer a cote
-			elseif{And (({OS.rand} mod 100) < 30) {And Map.(NewY+1).(NewX+1)==1 ThisTrainer==Player}} then  Boolean = true Enemy = {GenerateRandomPokemon}
-			   trainer(name:State.name positionX:NewX
-				   positionY:NewY pokemon:State.pokemon busy:true)
-			else Boolean = false  trainer(name:State.name positionX:NewX
-						      positionY:NewY pokemon:State.pokemon busy:false)end %rien du tout 
+			      if(Result.boolean) then Boolean = true
+				 {Send Result.trainer setBusy(true)} Enemy=Result.trainer trainer(name:State.name positionX:NewX
+												  positionY:NewY pokemon:State.pokemon busy:true) % il y a un trainer a cote
+			      elseif{And (({OS.rand} mod 100) < 30) {And Map.(NewY+1).(NewX+1)==1 ThisTrainer==Player}} then  Boolean = true Enemy = {GenerateRandomPokemon}
+				 trainer(name:State.name positionX:NewX
+					 positionY:NewY pokemon:State.pokemon busy:true)
+			      else Boolean = false  trainer(name:State.name positionX:NewX
+							    positionY:NewY pokemon:State.pokemon busy:false)end %rien du tout 
+			   end
+			end
 		     end
 		  end
 	       end
@@ -462,7 +468,7 @@ in
 														      Desc = td(label(text:"You won the fight!" bg:white)
 																lr(label(text:"Your pokemon has" bg:white) label(text:StatePokemon.hp bg:white) label(text:"Hp remaining." bg:white))
 																button(text:"Close" action:toplevel#close bg:white)
-															   bg:white
+																bg:white
 															       )
 														   in
 														      {{QTk.build Desc} show}
@@ -547,7 +553,7 @@ in
 						     end
 				 bg:white
 				)
-			   bg:white
+			  bg:white
 			)
 	    in	       
 	       Window={QTk.build Desc}
@@ -577,7 +583,7 @@ in
       end
    end
 
-    proc{ShowPokemon Pokemon Label}
+   proc{ShowPokemon Pokemon Label}
       local
 	 Desc
 	 State
