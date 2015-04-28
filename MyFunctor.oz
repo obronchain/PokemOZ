@@ -95,8 +95,6 @@ define
 	 else
 	    skip
 	 end
-	 {Send Player getState(State)}
-	 {Browse State}
       end
    end
 

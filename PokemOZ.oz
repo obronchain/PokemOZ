@@ -52,7 +52,6 @@ define
 
    %permet de placer un perso a une position X Y pour qu'il regarde dans la direction Dir
    proc{CreatePerso Dir X Y}
-      {Browse 'inCreatePerso'}
       case Dir of
 	 'up' then {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:SachaUp)}
       []'down' then {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:SachaDown)}
@@ -103,7 +102,7 @@ in
       State
    end
    
-   Speed = 1
+   Speed = 8
    Browse = Browser.browse
    Map = column(line(1 1 0 0 1 1 0)
 		line(1 1 0 0 0 0 0)
@@ -175,11 +174,12 @@ in
 
    %init les donnees utiles pour le jeu. Cree le joueur, son pokemon, la list des entraineurs, et lance le thread des autres entraineurs
    proc{Init}
-      {Browse 'init'}
       local  EnemyPokemon Loop in
 	 PokemonPlayer = {NewPortObject PokemozBehaviour pokemon(name:mapute type:grass hp:20 lx:5 xp:0)}
 	 Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0 busy:false)}
 	 Trainers = [Player {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
+		     {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
+		     {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
 		     {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
 		    ]
 	 
@@ -234,10 +234,14 @@ in
       []cure(X) then local
 			NewHp
 			proc{Loop N}
+			   {Browse N}
+			   {Delay 200}
 			   if LevelList.N.lx==State.lx then NewHp = LevelList.N.hp
-			   else {Loop+1} end 
+			   else {Loop N+1}  end 
 			end
 		     in
+			{Browse State}
+			{Delay 200}
 			{Loop 1}
 			pokemon(name:State.name type:State.type xp:State.xp hp:NewHp lx:State.lx)
 		     end
@@ -245,7 +249,6 @@ in
       []watchEndOfFight(EnemyObject) then local
 					     Enemy				    
 					     fun{NewLevel N XP}
-						{Browse N}
 						if N==0 then %trouve la nouvelle valeur des xp
 						   local NewXp in
 						      if(Enemy.lx > State.lx)then NewXp = State.xp + Enemy.lx - State.lx
@@ -269,8 +272,6 @@ in
 
 %simule les combats entre les pokemons. Renvoie true si D est battu
    fun{Fight PokemozA PokemozD}
-      {Browse PokemozA}
-      {Browse PokemozD}
       local Grid = grid( grass:grid(grass:2 fire:1 water:3)
 			 fire:grid(grass:3 fire:2 water:1)
 			 water:grid(grass:1 fire:3 water:2))
@@ -294,12 +295,11 @@ in
       case Msg of
 	 getState(X) then X = State State
 	 %permet de dire qu'il est occupe (qu'il est occupe de combattre , le thread du trainer le fait plus bouger)
-      []setBusy(S) then {Browse  'setBusy'} {Browse S} trainer(name:State.name pokemon:State.pokemon positionX:State.positionX positionY:State.positionY busy:S)
+      []setBusy(S) then  trainer(name:State.name pokemon:State.pokemon positionX:State.positionX positionY:State.positionY busy:S)
 	 % permet de bouger le traineur. boolean dit est liee a true si il y a un combat. Enemy est alors lie a l'enemy a combattre, false sinon pour boolean 
       []move(dir:Dir boolean:Boolean enemy:Enemy trainer:ThisTrainer ) then %Enemy est soit un portObject trainer soit un tuple pokemon
 	 if State.busy then Boolean=false State
 	 else  local NewX NewY in
-		  {Browse 'matchMove'}
 	 %trouver la nouvelle position
 		  case Dir of
 		     'up' then if(State.positionY-1 < 0) then NewY = State.positionY NewX = State.positionX
@@ -332,7 +332,7 @@ in
 				 if H==ThisTrainer then {FindIfTrainer PP T}
 				 else 
 				    {Send H getState(State)}
-				    {Browse State.busy}
+			
 				    if {And {FindIfIn State.positionX State.positionY PP} {Not State.busy}} then if {Or ThisTrainer==Player H==Player} then is(boolean:true trainer:H)
 														    else {FindIfTrainer PP T}end
 				    else {FindIfTrainer PP T} end
@@ -379,10 +379,9 @@ in
 	       elseif Random <75 then Move.dir = 'down'
 	       else Move.dir = 'left'
 	       end
-	       
 	       {Send MoveBuffer moveBuffer(trainer:Trainer moveCommand:Move)}
 	       {Send MapObject refresh(trainer:Trainer dir:Move.dir oldX:State.positionX oldY:State.positionY)}
-	       if Move.boolean then {HandelFight Trainer Move}
+	       if Move.boolean then {HandelFight Move.enemy  move(dir:Move.dir boolean:Move.boolean enemy:Trainer trainer:Move.enemy)}
 	       else skip end
 	       {Loop}
 	    end
@@ -406,7 +405,7 @@ in
 	 ImageHeight = 60
 	 CanvaWidth = 5
 	 CanvaHeight = 5
-	 {Browse [PokemonPlayer EnemyObject]}
+
 	 case Enemy of
 	    pokemon(name:Name type:Type lx:Lx hp:Hp xp:Xp) then
 	    local
@@ -421,7 +420,7 @@ in
 	       
 	       Desc=td(canvas(handle:Ca width:250 height:250 bg:white)
 		       button(text:"Show enemy's pokemon" action:proc{$}{ShowPokemon EnemyObject "Wild Pokemon"} end bg:white)
-		       button(text:"Fight" action:proc{$} {Browse [PokemonPlayer EnemyObject]}
+		       button(text:"Fight" action:proc{$} 
 						          if {Fight PokemonPlayer EnemyObject}==true then {Window close} {Send PokemonPlayer watchEndOfFight(EnemyObject)} WaitVal=unit
 							  elseif {Fight EnemyObject PokemonPlayer}==true then {Window close} {Send EnemyObject watchEndOfFight(PokemonPlayer)} WaitVal=unit
 							  else skip
@@ -473,7 +472,6 @@ in
 	    {Send Move.enemy setBusy(false)}
 	    {Send Player setBusy(false)}
 	 end
-	 {Browse 'EndOfHandelFight'}
       end
    end
 
