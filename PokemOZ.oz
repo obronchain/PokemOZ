@@ -7,6 +7,7 @@ import
 export
    Init
    Browse
+   Fight
    Player
    PokemonPlayer
    Map
@@ -214,6 +215,14 @@ in
 				   hp:NewHp lx:State.lx xp:State.xp)
 			end
       %Lie letat du portObject a X
+      []fight(EnemyObject) then
+	 local Enemy in
+	    {Send EnemyObject getState(Enemy)}
+	    case Enemy of trainer(name:Name pokemon:PokemonEnemy positionX:X positionY:Y busy:Busy) then local Winner in Winner = {Fight State.pokemon PokemonEnemy} end  State
+	    [] pokemon(name:Name type:Type lx:Lx xp:Xp hp:Hp) then	  
+	       local Winner = {Fight State.pokemon EnemyObject} in  State end      
+	    end
+	 end
       []getState(X) then X = State State
 	 % soigne le pokemon
       []cure(X) then local
@@ -249,8 +258,10 @@ in
       end
    end
 
-%simule les combats entre les pokemons. Renvoie le pokemon vainceur et modifie les niveaux si besoin
+%simule les combats entre les pokemons. Renvoie true si D est battu
    fun{Fight PokemozA PokemozD}
+      {Browse PokemozA}
+      {Browse PokemozD}
       local Grid = grid( grass:grid(grass:2 fire:1 water:3)
 			 fire:grid(grass:3 fire:2 water:1)
 			 water:grid(grass:1 fire:3 water:2))
@@ -259,12 +270,12 @@ in
       in
 	 {Send PokemozA getState(StateA)}
 	 {Send PokemozD getState(StateD)}
-	 if (StateA.hp == 0) then {Send PokemozD watchEndOfFight(StateA)} PokemozD
-	 elseif (StateD.hp == 0) then {Send PokemozA watchEndOfFight(StateD)} PokemozA
-	 elseif (({OS.rand} mod 100) > ((6+StateA.lx-StateD.lx)*9)) then {Fight PokemozD PokemozA}
+	 if (({OS.rand} mod 100) > ((6+StateA.lx-StateD.lx)*9)) then false
 	 else
 	    {Send PokemozD injure(Grid.(StateA.type).(StateD.type))}
-	    {Fight PokemozD PokemozA}
+	    if (StateD.hp)-(Grid.(StateA.type).(StateD.type))>1 then false
+	    else true
+	    end 
 	 end
       end
    end

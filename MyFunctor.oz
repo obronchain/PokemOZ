@@ -11,6 +11,7 @@ define
    Trainers = PokemOZ.trainers
    MoveBuffer = PokemOZ.moveBuffer
    PokemonPlayer = PokemOZ.pokemonPlayer
+   Fight = PokemOZ.fight
    Init = PokemOZ.init
    Map = PokemOZ.map
    PokemozBehaviour = PokemOZ.pokemozBehaviour
@@ -109,10 +110,12 @@ define
 	 ImageHeight = 60
 	 CanvaWidth = 5
 	 CanvaHeight = 5
+	 {Browse [PokemonPlayer EnemyObject]}
 	 case Enemy of
 	    pokemon(name:Name type:Type lx:Lx hp:Hp xp:Xp) then
 	    local
 	       Desc
+	       Window
 	    in 
 	      % Desc = td( label(text:"you find a wild pokemon")
 	      % button(text:"show enemy's pokemon" action:proc{$}{ShowPokemon EnemyObject "wild Pokemon"} end)
@@ -122,10 +125,16 @@ define
 	       
 	       Desc=td(canvas(handle:Ca width:CanvaWidth*ImageWidth height:CanvaHeight*ImageWidth)
 		       button(text:"show enemy's pokemon" action:proc{$}{ShowPokemon EnemyObject "wild Pokemon"} end)
-		       button(text:"Fight" action:proc{$} {Send Player fight(EnemyObject)} WaitVal=unit end)
-		       button(text:"Run" action:proc{$} WaitVal=unit end)
+		       button(text:"Fight" action:proc{$} {Browse [PokemonPlayer EnemyObject]}
+						          if {Fight PokemonPlayer EnemyObject}==true then {Window close} WaitVal=unit
+							  elseif {Fight EnemyObject PokemonPlayer}==true then {Window close} WaitVal=unit
+							  else skip
+							  end
+						  end)
+		       button(text:"Run" action:proc{$} {Window close} WaitVal=unit end)
 		       )
-	       {{QTk.build Desc} show}
+	       Window= {QTk.build Desc}
+	       {Window show}
 	       {Ca create(text text:Name  anchor:nw font:white 1 1)}
 	       {Ca create(text text:Lx anchor:nw font:white 1 20)}
 	       {Ca create(text text:Hp anchor:nw font:white 1 40)}
@@ -140,13 +149,19 @@ define
 	    end
 	 []trainer(name:Name pokemon:Pokemon positionX:PosX positionY:PosY busy:Busy) then
 	    local
+	       Window
 	       Desc = td( label(text:"you find another trainer")
 			  button(text:"ShowEnemyPokemon" action:proc{$} {ShowPokemon Pokemon "enemy s pokemon"} end)
-			  button(text:"BeginFight" action:proc{$} {Send Player fight(EnemyObject)} WaitVal=unit  end)
-			  button(text:"Close" action:toplevel#close)
+			  button(text:"Fight" action:proc{$}
+							     if {Fight PokemonPlayer Pokemon} then  {Window close} WaitVal=unit
+							     elseif {Fight Pokemon PokemonPlayer} then {Window close} WaitVal=unit
+							     else skip
+							     end
+							  end)
 			)
 	    in
-	       {{QTk.build Desc} show}  
+	       Window={QTk.build Desc}
+	       {Window show}
 	    end
 	    {Wait WaitVal}
 	    {Send Move.enemy setBusy(false)}
