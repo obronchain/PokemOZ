@@ -180,7 +180,7 @@ in
 	 PokemonPlayer = {NewPortObject PokemozBehaviour pokemon(name:mapute type:grass hp:20 lx:5 xp:0)}
 	 Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0 busy:false)}
 	 Trainers = [Player {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
-
+		     {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
 		    ]
 	 
 	 proc{Loop L}
@@ -332,7 +332,9 @@ in
 				 if H==ThisTrainer then {FindIfTrainer PP T}
 				 else 
 				    {Send H getState(State)}
-				    if{FindIfIn State.positionX State.positionY PP} then is(boolean:true trainer:H)
+				    {Browse State.busy}
+				    if {And {FindIfIn State.positionX State.positionY PP} {Not State.busy}} then if {Or ThisTrainer==Player H==Player} then is(boolean:true trainer:H)
+														    else {FindIfTrainer PP T}end
 				    else {FindIfTrainer PP T} end
 				 end
 			      end
@@ -343,7 +345,7 @@ in
 			if(Result.boolean) then Boolean = true
 			   {Send Result.trainer setBusy(true)} Enemy=Result.trainer trainer(name:State.name positionX:NewX
 											    positionY:NewY pokemon:State.pokemon busy:true) % il y a un trainer a cote
-			elseif{And (({OS.rand} mod 100) < 30) Map.(NewY+1).(NewX+1)==1} then  Boolean = true Enemy = {GenerateRandomPokemon}
+			elseif{And (({OS.rand} mod 100) < 30) {And Map.(NewY+1).(NewX+1)==1 ThisTrainer==Player}} then  Boolean = true Enemy = {GenerateRandomPokemon}
 			   trainer(name:State.name positionX:NewX
 				   positionY:NewY pokemon:State.pokemon busy:true)
 			else Boolean = false  trainer(name:State.name positionX:NewX
