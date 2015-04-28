@@ -82,6 +82,7 @@ define
    Player
    PokemonPlayer
    Browse
+   ChoosePokemon
    Init
    LevelList
    GenerateRandomPokemon
@@ -173,14 +174,51 @@ in
 %Le classe PortObject
 %On rajoute dans les trainers l'etat busy. cet etat permet de voir si il est occupe et ou si non. busy si est en combat.
 
+
+
+     fun{ChoosePokemon}
+      local
+	 Pokemon
+	 Charm
+	 Ozt
+	 Bulb
+	 Window
+	 Desc = td(label(text:"Choose your pokemon!" bg:white)
+		   lr(canvas(handle:Charm height:100 width:100 bg:white)
+		      canvas(handle:Ozt height:100 width:100 bg:white)
+		      canvas(handle:Bulb height:100 width:100 bg:white)
+		      )
+		   bg:white
+		   )
+      in
+	 Window= {QTk.build Desc}
+	 {Window show}
+	 {Charm create(image 0 0 anchor:nw image:Charmandoz)}
+	 {Ozt create(image 0 0 anchor:nw image:Oztirtle)}
+	 {Bulb create(image 0 0 anchor:nw image:Bulbasoz)}
+	 {Charm bind(event:"<1>" action:proc{$} Pokemon=1 {Window close} end)}
+	 {Ozt bind(event:"<1>" action:proc{$} Pokemon=2 {Window close} end)}
+	 {Bulb bind(event:"<1>" action:proc{$} Pokemon=3 {Window close} end)}
+	 {Browse Pokemon}
+	 {Delay 2000}
+	 
+	 if Pokemon==1 then {NewPortObject PokemozBehaviour pokemon(name:"Salamèche" type:fire hp:20 lx:5 xp:0)}
+	 elseif Pokemon==2 then {NewPortObject PokemozBehaviour pokemon(name:"Carapuce" type:water hp:20 lx:5 xp:0)}
+	 else {NewPortObject PokemozBehaviour pokemon(name:"Bulbizarre" type:grass hp:20 lx:5 xp:0)}
+	 end
+      end
+     end
+     
    %init les donnees utiles pour le jeu. Cree le joueur, son pokemon, la list des entraineurs, et lance le thread des autres entraineurs
    proc{Init}
       {Browse 'init'}
       local  EnemyPokemon Loop in
-	 PokemonPlayer = {NewPortObject PokemozBehaviour pokemon(name:mapute type:grass hp:20 lx:5 xp:0)}
+	 PokemonPlayer = {ChoosePokemon}
+	 {Wait PokemonPlayer}
+	 %PokemonPlayer = {NewPortObject PokemozBehaviour pokemon(name:mapute type:grass hp:20 lx:5 xp:0)}
 	 Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0 busy:false)}
 	 Trainers = [Player {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
-		     {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
+
 		    ]
 	 
 	 proc{Loop L}
@@ -195,6 +233,8 @@ in
 	 MoveBuffer = {NewPortObject MoveBufferBehaviour move(_)}
       end
    end
+
+   
 
    
    fun {NewPortObject Behaviour Init}
@@ -332,9 +372,7 @@ in
 				 if H==ThisTrainer then {FindIfTrainer PP T}
 				 else 
 				    {Send H getState(State)}
-				    {Browse State.busy}
-				    if {And {FindIfIn State.positionX State.positionY PP} {Not State.busy}} then if {Or ThisTrainer==Player H==Player} then is(boolean:true trainer:H)
-														    else {FindIfTrainer PP T}end
+				    if{FindIfIn State.positionX State.positionY PP} then is(boolean:true trainer:H)
 				    else {FindIfTrainer PP T} end
 				 end
 			      end
@@ -345,7 +383,7 @@ in
 			if(Result.boolean) then Boolean = true
 			   {Send Result.trainer setBusy(true)} Enemy=Result.trainer trainer(name:State.name positionX:NewX
 											    positionY:NewY pokemon:State.pokemon busy:true) % il y a un trainer a cote
-			elseif{And (({OS.rand} mod 100) < 30) {And Map.(NewY+1).(NewX+1)==1 ThisTrainer==Player}} then  Boolean = true Enemy = {GenerateRandomPokemon}
+			elseif{And (({OS.rand} mod 100) < 30) Map.(NewY+1).(NewX+1)==1} then  Boolean = true Enemy = {GenerateRandomPokemon}
 			   trainer(name:State.name positionX:NewX
 				   positionY:NewY pokemon:State.pokemon busy:true)
 			else Boolean = false  trainer(name:State.name positionX:NewX
