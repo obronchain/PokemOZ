@@ -33,7 +33,7 @@ define
 
    C %canvas
    Ca
-
+  
    fun{ShowImage Type}
       case Type of 'grass' then Bulbasoz
       [] 'fire' then Charmandoz
@@ -288,8 +288,7 @@ in
 					     fun{NewLevel N XP}
 						if N==0 then %trouve la nouvelle valeur des xp
 						   local NewXp in
-						      if(Enemy.lx > State.lx)then NewXp = State.xp + Enemy.lx - State.lx
-						      else NewXp = State.xp + 1 end
+						      NewXp = State.xp + Enemy.lx
 						      {NewLevel N+1 NewXp}
 						   end
 						elseif N==7 then pokemon(name:State.name type:State.type xp:XP hp:State.hp lx:State.lx) %dans le cas ou aucun increment de niveau est necessaire
