@@ -178,9 +178,6 @@ in
 	 PokemonPlayer = {NewPortObject PokemozBehaviour pokemon(name:mapute type:grass hp:20 lx:5 xp:0)}
 	 Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0 busy:false)}
 	 Trainers = [Player {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
-		     {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
-		     {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
-		     {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
 		    ]
 	 
 	 proc{Loop L}
@@ -411,6 +408,7 @@ in
 	    local
 	       Desc
 	       Window
+	       Canvas
 	    in 
 	      % Desc = td( label(text:"you find a wild pokemon")
 	      % button(text:"show enemy's pokemon" action:proc{$}{ShowPokemon EnemyObject "wild Pokemon"} end)
@@ -418,26 +416,111 @@ in
 	      %	  button(text:"Run" action:proc{$} WaitVal=unit end)
 	      %		)
 	       
-	       Desc=td(canvas(handle:Ca width:250 height:250 bg:white)
-		       button(text:"Show enemy's pokemon" action:proc{$}{ShowPokemon EnemyObject "Wild Pokemon"} end bg:white)
-		       button(text:"Fight" action:proc{$} 
-						          if {Fight PokemonPlayer EnemyObject}==true then {Window close} {Send PokemonPlayer watchEndOfFight(EnemyObject)} WaitVal=unit
-							  elseif {Fight EnemyObject PokemonPlayer}==true then {Window close} {Send EnemyObject watchEndOfFight(PokemonPlayer)} WaitVal=unit
-							  else skip
-							  end
+	       Desc=td(canvas(handle:Canvas width:250 height:250 bg:white)
+		       button(text:"Fight" action:proc{$} {Browse [PokemonPlayer EnemyObject]}
+						     if {Fight PokemonPlayer EnemyObject}==true then {Window close}local
+														      StatePokemon
+														      {Send PokemonPlayer getState(StatePokemon)}
+														      Desc = td(label(text:"You won the fight!" bg:white)
+																lr(label(text:"Your pokemon has" bg:white) label(text:StatePokemon.hp bg:white) label(text:"Hp remaining." bg:white))
+																button(text:"Close" action:toplevel#close bg:white)
+															   bg:white
+															       )
+														   in
+														      {{QTk.build Desc} show}
+														   end
+							{Send PokemonPlayer watchEndOfFight(EnemyObject)} WaitVal=unit
+						     elseif {Fight EnemyObject PokemonPlayer}==true then {Window close} local
+															   StatePokemon
+															   {Send EnemyObject getState(StatePokemon)}
+															   Desc = td(label(text:"You won the fight!" bg:white)
+																     lr(label(text:"Your pokemon has" bg:white) label(text:StatePokemon.hp bg:white) label(text:"Hp remaining." bg:white))
+																     button(text:"Close" action:toplevel#close bg:white)
+																     bg:white
+																    )
+															in
+															   {{QTk.build Desc} show}
+															end
+							{Send EnemyObject watchEndOfFight(PokemonPlayer)} WaitVal=unit
+						     else skip
+						     end
 						  end
-			     bg:white)
+			      bg:white)
 		       button(text:"Run" action:proc{$} {Window close} WaitVal=unit end bg:white)
 		       bg:white
 		      )
 	       Window= {QTk.build Desc}
 	       {Window show}
+	       {Canvas create(text 130 10 text:"Name :"  anchor:nw)}
+	       {Canvas create(text 130 25 text:"Level :" anchor:nw )}
+	       {Canvas create(text 130 40 text:"Hp :" anchor:nw  )}
+	       {Canvas create(text 180 10 text:Enemy.name  anchor:nw)}
+	       {Canvas create(text 180 25 text:Enemy.lx anchor:nw )}
+	       {Canvas create(text 180 40 text:Enemy.hp anchor:nw )}
+	       
+	       {Canvas create(text 10 140 text:"Name :"  anchor:nw)}
+	       {Canvas create(text 10 155 text:"Level :" anchor:nw )}
+	       {Canvas create(text 10 170 text:"Hp :" anchor:nw  )}
+	       {Canvas create(text 60 140 text:StatePokemonPlayer.name  anchor:nw)}
+	       {Canvas create(text 60 155 text:StatePokemonPlayer.lx anchor:nw )}
+	       {Canvas create(text 60 170 text:StatePokemonPlayer.hp anchor:nw )}
+	       
+	       {Canvas create(image 10 10 anchor:nw image:{ShowImage Enemy.type})}
+	       {Canvas create(image 140 140 anchor:nw image:{ShowImage StatePokemonPlayer.type})}
+
+	       {Wait WaitVal}
+	       {Send Player setBusy(false)}
+	    end
+	 []trainer(name:Name pokemon:Pokemon positionX:PosX positionY:PosY busy:Busy) then
+	    local
+	       Window
+	       EnemyPokemon
+	       Ca
+	       Desc = td( label(text:"A fight with another trainer just started!"  bg:white)
+			  canvas(handle:Ca height:250 width:250 bg:white)
+			  button(text:"ShowEnemyPokemon" action:proc{$} {ShowPokemon Pokemon "Enemy's pokemon"} end  bg:white)
+			  button(text:"Fight" action:proc{$}
+							if {Fight PokemonPlayer Pokemon} then  {Window close} local
+														 StatePokemon
+														 {Send PokemonPlayer getState(StatePokemon)}
+														 Desc = td(label(text:"You won the fight!" bg:white)
+															   lr(label(text:"Your pokemon has" bg:white) label(text:StatePokemon.hp bg:white) label(text:"Hp remaining." bg:white))
+															   button(text:"Close" action:toplevel#close bg:white)
+															   bg:white
+															  )
+													      in
+														 {{QTk.build Desc} show}
+													      end
+							   {Send PokemonPlayer watchEndOfFight(Pokemon)} WaitVal=unit
+							elseif {Fight Pokemon PokemonPlayer} then {Window close} local
+														    StatePokemon
+														    {Send Pokemon getState(StatePokemon)}
+														    Desc = td(label(text:"You lost the fight!" bg:white)
+															      lr(label(text:"Enemy pokemon has" bg:white) label(text:StatePokemon.hp bg:white) label(text:"Hp remaining." bg:white))
+															      button(text:"Close" action:toplevel#close bg:white)
+															      bg:white
+															     )
+														 in
+														    {{QTk.build Desc} show}
+														 end
+							   {Send Pokemon watchEndOfFight(PokemonPlayer)} WaitVal=unit
+							else skip
+							end
+						     end
+				 bg:white
+				)
+			   bg:white
+			)
+	    in	       
+	       Window={QTk.build Desc}
+	       {Window show}
+	       {Send Pokemon getState(EnemyPokemon)}
 	       {Ca create(text 130 10 text:"Name :"  anchor:nw)}
 	       {Ca create(text 130 25 text:"Level :" anchor:nw )}
 	       {Ca create(text 130 40 text:"Hp :" anchor:nw  )}
-	       {Ca create(text 180 10 text:Enemy.name  anchor:nw)}
-	       {Ca create(text 180 25 text:Enemy.lx anchor:nw )}
-	       {Ca create(text 180 40 text:Enemy.hp anchor:nw )}
+	       {Ca create(text 180 10 text:EnemyPokemon.name  anchor:nw)}
+	       {Ca create(text 180 25 text:EnemyPokemon.lx anchor:nw )}
+	       {Ca create(text 180 40 text:EnemyPokemon.hp anchor:nw )}
 	       
 	       {Ca create(text 10 140 text:"Name :"  anchor:nw)}
 	       {Ca create(text 10 155 text:"Level :" anchor:nw )}
@@ -446,27 +529,8 @@ in
 	       {Ca create(text 60 155 text:StatePokemonPlayer.lx anchor:nw )}
 	       {Ca create(text 60 170 text:StatePokemonPlayer.hp anchor:nw )}
 	       
-	       {Ca create(image 10 10 anchor:nw image:{ShowImage Enemy.type})}
+	       {Ca create(image 10 10 anchor:nw image:{ShowImage EnemyPokemon.type})}
 	       {Ca create(image 140 140 anchor:nw image:{ShowImage StatePokemonPlayer.type})}
-
-	       {Wait WaitVal}
-	       {Send Player setBusy(false)}
-	    end
-	 []trainer(name:Name pokemon:Pokemon positionX:PosX positionY:PosY busy:Busy) then
-	    local
-	       Window
-	       Desc = td( label(text:"you find another trainer")
-			  button(text:"ShowEnemyPokemon" action:proc{$} {ShowPokemon Pokemon "enemy s pokemon"} end)
-			  button(text:"Fight" action:proc{$}
-							     if {Fight PokemonPlayer Pokemon} then  {Window close} {Send PokemonPlayer watchEndOfFight(Pokemon)} WaitVal=unit
-							     elseif {Fight Pokemon PokemonPlayer} then {Window close} {Send Pokemon watchEndOfFight(PokemonPlayer)} WaitVal=unit
-							     else skip
-							     end
-							  end)
-			)
-	    in
-	       Window={QTk.build Desc}
-	       {Window show}
 	    end
 	    {Wait WaitVal}
 	    {Send Move.enemy setBusy(false)}
