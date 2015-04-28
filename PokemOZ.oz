@@ -17,10 +17,12 @@ export
    CreateGrassGood
    CreateGrassBad
    C
+   Ca
    ImageWidth
    MoveBufferBehaviour
    MoveBuffer
    GrassGood
+   GrassBad
 define
    ImageWidth=60
    GrassGood = {QTk.newImage photo(url:'Images/grassgood.gif' height:0 width:0)}
@@ -30,7 +32,7 @@ define
    SachaRight = {QTk.newImage photo(url:'Images/sacharight.gif' height:0 width:0)}
    SachaUp = {QTk.newImage photo(url:'Images/sachaup.gif' height:0 width:0)}
    C %canvas
-
+   Ca
    % cree l'image avec de herbes basses
    proc{CreateGrassGood X Y}
       {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:GrassGood)}

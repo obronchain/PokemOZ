@@ -18,7 +18,9 @@ define
    CreateGrassGood = PokemOZ.createGrassGood
    CreateGrassBad = PokemOZ.createGrassBad
    ImageWidth = PokemOZ.imageWidth
+   GrassBad=PokemOZ.grassBad
    C = PokemOZ.c
+   Ca = PokemOZ.ca
 
    %permet d'afficher la map et de liver les touches aux bouttons aux actions (MovingButton)
    proc{ShowMap} 
@@ -26,6 +28,7 @@ define
 	 Height={Record.width Map $}
 	 Width={Record.width Map.1 $} 
 	 Desc=canvas(handle:C width:Width*ImageWidth height:Height*ImageWidth)
+	 Ca
 	 proc{CreateCanvas X Y}
 	    if X==Width then {CreateCanvas 0 Y+1}
 	    else if Y==Height then skip
@@ -36,14 +39,41 @@ define
 	    end
 	 end
 	 Window
+	 %Statepok
+	 %{Send PokemonPlayer getState(Statepok)}
       in
-	 Window = {QTk.build td(Desc)}
+	 Window = {QTk.build td(Desc td(button(text:"Show your pokemon" action:proc{$} {ShowPokemon PokemonPlayer "Your pokemon"} end)
+				%	canvas(handle:Ca width:2*ImageWidth height:(Height-3)*ImageWidth)
+				%	lr(label(text:"Name :" bg:white) label(text:Statepok.name bg:white)  bg:white)
+				%	lr(label(text:"Type : "  bg:white) label(text:Statepok.type  bg:white)  bg:white)
+				%	lr(label(text:"Level : "  bg:white) label(text:Statepok.lx  bg:white)  bg:white)
+				%	lr(label(text:"Hp : "  bg:white) label(text:Statepok.hp  bg:white)  bg:white)
+				%	lr(label(text:"Xp : "  bg:white) label(text:Statepok.xp  bg:white)  bg:white)
+				%	bg:white
+				       )
+			       )
+		   }
 	 {Window bind(event:"<Up>" action:proc{$} {MovingButton 'up'} end)}
 	 {Window bind(event:"<Down>" action:proc{$} {MovingButton 'down'} end)}
 	 {Window bind(event:"<Left>" action:proc{$} {MovingButton 'left'} end)}
 	 {Window bind(event:"<Right>" action:proc{$} {MovingButton 'right'} end)}
 	 {Window show}
-	 {CreateCanvas 0 0}
+	 {CreateCanvas 0 0}	 
+	 %{Ca create(image 30 30 anchor:nw image:GrassBad)} %Mettre l'image du pokemon
+
+	 %{Ca create(text 5 90 anchor:nw text:"Name : ")}
+	 %{Ca create(text 60 90 anchor:nw text:Statepok.name)}
+	 %{Ca create(text 5 105 anchor:nw text:"Type : ")}
+	 %{Ca create(text 60 105 anchor:nw text:Statepok.type)}
+	 %{Ca create(text 5 120 anchor:nw text:"Level : ")}
+	 %{Ca create(text 60 120 anchor:nw text:Statepok.lx)}
+	 %{Ca create(text 5 135 anchor:nw text:"Xp : ")}
+	 %{Ca create(text 60 135 anchor:nw text:Statepok.xp)}
+	 %{Ca create(text 5 150 anchor:nw text:"Hp : ")}
+	 %{Ca create(text 60 150 anchor:nw text:Statepok.hp)}
+	 %{Ca delete}
+	 
+	% {Ca create(image 30 90 anchor:nw image:GrassBad)}
       end
    end
    
@@ -53,18 +83,13 @@ define
 	 State
       in
 	 {Send Pokemon getState(State)}
-	 Desc = td(label(text:Label)
-		   label(text:"name:")
-		   label(text:State.name)
-		   label(text:"type:")
-		   label(text:State.type)
-		   label(text:"level:")
-		   label(text:State.lx)
-		   label(text:"Hp:")
-		   label(text:State.hp)
-		   label(text:"Xp:")
-		   label(text:State.xp)
-		   button(text:"Close" action:toplevel#close)
+	 Desc = td(label(text:Label bg:white) bg:white
+		   lr(label(text:"Name:" bg:white) bg:white label(text:State.name bg:white))
+		   lr(label(text:"Type:" bg:white) bg:white label(text:State.type bg:white))
+		   lr(label(text:"Level:" bg:white) bg:white label(text:State.lx bg:white))
+		   lr(label(text:"Hp:" bg:white)	bg:white label(text:State.hp bg:white))
+		   lr(label(text:"Xp:" bg:white) bg:white label(text:State.xp bg:white))
+		   lr(button(text:"Close" action:toplevel#close bg:white)  bg:white)
 		  )
 	 {{QTk.build Desc} show}
       end
@@ -151,5 +176,5 @@ define
    end
 in
    {Init} %initie toutes les valeurs
-   {ShowMap} %montre la carrte
+   {ShowMap} %montre la carte
 end
