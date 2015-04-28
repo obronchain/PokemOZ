@@ -3,6 +3,7 @@ import
    QTk at 'x-oz://system/wp/QTk.ozf'
    PokemOZ at 'PokemOZ.ozf'
    System
+   Atom
 define
    GrassGood = PokemOZ.grassGood
    Player = PokemOZ.player
@@ -76,6 +77,7 @@ define
 	% {Ca create(image 30 90 anchor:nw image:GrassBad)}
       end
    end
+
    
    proc{ShowPokemon Pokemon Label}
       local
@@ -98,12 +100,13 @@ define
    
    % Permet de gerer l'interface graphique pour les combats. Que ce soit avec un autre entraineur ou un autre pokemon
    proc{HandelFight Move}
-      local EnemyObject Enemy WaitVal ImageWidth ImageHeight CanvaHeight CanvaWidth Ca
+      local EnemyObject Enemy WaitVal ImageWidth ImageHeight CanvaHeight CanvaWidth Ca StatePokemonPlayer
       in
 	 EnemyObject = Move.enemy
 	 {Send EnemyObject getState(Enemy)}
-	 ImageWidth = 30
-	 ImageHeight = 30
+	 {Send PokemonPlayer getState(StatePokemonPlayer)}
+	 ImageWidth = 60
+	 ImageHeight = 60
 	 CanvaWidth = 5
 	 CanvaHeight = 5
 	 case Enemy of
@@ -122,9 +125,15 @@ define
 		       button(text:"Fight" action:proc{$} {Send Player fight(EnemyObject)} WaitVal=unit end)
 		       button(text:"Run" action:proc{$} WaitVal=unit end)
 		       )
-	       {{QTk.build Desc} show}	 
-	       {Ca create(image  (3)*ImageWidth (1)*ImageHeight anchor:nw image:GrassGood)}
-	       {Ca create(image  (1)*ImageWidth (3)*ImageHeight anchor:nw image:GrassGood)}
+	       {{QTk.build Desc} show}
+	       {Ca create(text text:Name  anchor:nw font:white 1 1)}
+	       {Ca create(text text:Lx anchor:nw font:white 1 20)}
+	       {Ca create(text text:Hp anchor:nw font:white 1 40)}
+	       {Ca create(text text:StatePokemonPlayer.name  anchor:nw font:white (4)*ImageWidth (4)*ImageHeight)}
+	       {Ca create(text text:StatePokemonPlayer.lx anchor:nw font:white (4)*ImageWidth (4*ImageHeight+20))}
+	       {Ca create(text text:StatePokemonPlayer.hp anchor:nw font:white (4)*ImageWidth ((4*ImageHeight)+40))}
+	       {Ca create(image  (4)*ImageWidth (0)*ImageHeight anchor:nw image:GrassGood)}
+	       {Ca create(image  (0)*ImageWidth (4)*ImageHeight anchor:nw image:GrassGood)}
 
 	       {Wait WaitVal}
 	       {Send Player setBusy(false)}
