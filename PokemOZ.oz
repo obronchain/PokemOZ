@@ -16,6 +16,7 @@ export
    MoveBuffer
    GrassGood
    GrassBad
+   ShowImage
 define
    ImageWidth=60
    HandelFight
@@ -26,8 +27,19 @@ define
    SachaDown = {QTk.newImage photo(url:'Images/sachadown.gif' height:0 width:0)}
    SachaRight = {QTk.newImage photo(url:'Images/sacharight.gif' height:0 width:0)}
    SachaUp = {QTk.newImage photo(url:'Images/sachaup.gif' height:0 width:0)}
+   Bulbasoz = {QTk.newImage photo(url:'Images/Bulbasoz.gif' height:0 width:0)}
+   Charmandoz = {QTk.newImage photo(url:'Images/Charmandoz.gif' height:0 width:0)}
+   Oztirtle = {QTk.newImage photo(url:'Images/Oztirtle.gif' height:0 width:0)}
+
    C %canvas
    Ca
+
+   fun{ShowImage Type}
+      case Type of 'grass' then Bulbasoz
+      [] 'fire' then Charmandoz
+      [] 'water' then Oztirtle
+      end
+   end
    % cree l'image avec de herbes basses
    proc{CreateGrassGood X Y}
       {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:GrassGood)}
@@ -405,26 +417,36 @@ in
 	      %	  button(text:"Run" action:proc{$} WaitVal=unit end)
 	      %		)
 	       
-	       Desc=td(canvas(handle:Ca width:CanvaWidth*ImageWidth height:CanvaHeight*ImageWidth)
-		       button(text:"show enemy's pokemon" action:proc{$}{ShowPokemon EnemyObject "wild Pokemon"} end)
+	       Desc=td(canvas(handle:Ca width:250 height:250 bg:white)
+		       button(text:"Show enemy's pokemon" action:proc{$}{ShowPokemon EnemyObject "Wild Pokemon"} end bg:white)
 		       button(text:"Fight" action:proc{$} {Browse [PokemonPlayer EnemyObject]}
 						          if {Fight PokemonPlayer EnemyObject}==true then {Window close} {Send PokemonPlayer watchEndOfFight(EnemyObject)} WaitVal=unit
 							  elseif {Fight EnemyObject PokemonPlayer}==true then {Window close} {Send EnemyObject watchEndOfFight(PokemonPlayer)} WaitVal=unit
 							  else skip
 							  end
-						  end)
-		       button(text:"Run" action:proc{$} {Window close} WaitVal=unit end)
-		       )
+						  end
+			     bg:white)
+		       button(text:"Run" action:proc{$} {Window close} WaitVal=unit end bg:white)
+		       bg:white
+		      )
 	       Window= {QTk.build Desc}
 	       {Window show}
-	       {Ca create(text text:Name  anchor:nw font:white 1 1)}
-	       {Ca create(text text:Lx anchor:nw font:white 1 20)}
-	       {Ca create(text text:Hp anchor:nw font:white 1 40)}
-	       {Ca create(text text:StatePokemonPlayer.name  anchor:nw font:white (4)*ImageWidth (4)*ImageHeight)}
-	       {Ca create(text text:StatePokemonPlayer.lx anchor:nw font:white (4)*ImageWidth (4*ImageHeight+20))}
-	       {Ca create(text text:StatePokemonPlayer.hp anchor:nw font:white (4)*ImageWidth ((4*ImageHeight)+40))}
-	       {Ca create(image  (4)*ImageWidth (0)*ImageHeight anchor:nw image:GrassGood)}
-	       {Ca create(image  (0)*ImageWidth (4)*ImageHeight anchor:nw image:GrassGood)}
+	       {Ca create(text 130 10 text:"Name :"  anchor:nw)}
+	       {Ca create(text 130 25 text:"Level :" anchor:nw )}
+	       {Ca create(text 130 40 text:"Hp :" anchor:nw  )}
+	       {Ca create(text 180 10 text:Enemy.name  anchor:nw)}
+	       {Ca create(text 180 25 text:Enemy.lx anchor:nw )}
+	       {Ca create(text 180 40 text:Enemy.hp anchor:nw )}
+	       
+	       {Ca create(text 10 140 text:"Name :"  anchor:nw)}
+	       {Ca create(text 10 155 text:"Level :" anchor:nw )}
+	       {Ca create(text 10 170 text:"Hp :" anchor:nw  )}
+	       {Ca create(text 60 140 text:StatePokemonPlayer.name  anchor:nw)}
+	       {Ca create(text 60 155 text:StatePokemonPlayer.lx anchor:nw )}
+	       {Ca create(text 60 170 text:StatePokemonPlayer.hp anchor:nw )}
+	       
+	       {Ca create(image 10 10 anchor:nw image:{ShowImage Enemy.type})}
+	       {Ca create(image 140 140 anchor:nw image:{ShowImage StatePokemonPlayer.type})}
 
 	       {Wait WaitVal}
 	       {Send Player setBusy(false)}
@@ -457,9 +479,11 @@ in
       local
 	 Desc
 	 State
+	 Canvas
       in
 	 {Send Pokemon getState(State)}
 	 Desc = td(label(text:Label bg:white) bg:white
+		   canvas(handle:Canvas height:120 width:120 bg:white)
 		   lr(label(text:"Name:" bg:white) bg:white label(text:State.name bg:white))
 		   lr(label(text:"Type:" bg:white) bg:white label(text:State.type bg:white))
 		   lr(label(text:"Level:" bg:white) bg:white label(text:State.lx bg:white))
@@ -468,6 +492,7 @@ in
 		   lr(button(text:"Close" action:toplevel#close bg:white)  bg:white)
 		  )
 	 {{QTk.build Desc} show}
+	 {Canvas create(image 10 10 anchor:nw image:{ShowImage State.type})}
       end
    end
 

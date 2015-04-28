@@ -26,7 +26,7 @@ define
    GrassBad=PokemOZ.grassBad
    C = PokemOZ.c
    Ca = PokemOZ.ca
-
+   ShowImage = PokemOZ.showImage
    %permet d'afficher la map et de liver les touches aux bouttons aux actions (MovingButton)
    proc{ShowMap} 
       local
