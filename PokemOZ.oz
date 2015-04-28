@@ -236,8 +236,11 @@ in
 			pokemon(name:State.name type:State.type xp:State.xp hp:NewHp lx:State.lx)
 		     end
       %Permet de mettre les valeurs des hp level des pokemoz apres un combat
-      []watchEndOfFight(Enemy) then local 
+      []watchEndOfFight(EnemyObject) then local
+					Enemy				    
 				       fun{NewLevel N XP}
+					  {Delay 500}
+					  {Browse N}
 					  if N==0 then %trouve la nouvelle valeur des xp
 					     local NewXp in
 						if(Enemy.lx > State.lx)then NewXp = State.xp + Enemy.lx - State.lx
@@ -252,7 +255,8 @@ in
 					  end
 				       
 				       end
-				    in
+					  in
+					     {Send EnemyObject getState(Enemy)}
 				       {NewLevel 0 0}
 				    end				    
       end

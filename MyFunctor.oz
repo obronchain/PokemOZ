@@ -126,8 +126,8 @@ define
 	       Desc=td(canvas(handle:Ca width:CanvaWidth*ImageWidth height:CanvaHeight*ImageWidth)
 		       button(text:"show enemy's pokemon" action:proc{$}{ShowPokemon EnemyObject "wild Pokemon"} end)
 		       button(text:"Fight" action:proc{$} {Browse [PokemonPlayer EnemyObject]}
-						          if {Fight PokemonPlayer EnemyObject}==true then {Window close} WaitVal=unit
-							  elseif {Fight EnemyObject PokemonPlayer}==true then {Window close} WaitVal=unit
+						          if {Fight PokemonPlayer EnemyObject}==true then {Window close} {Send PokemonPlayer watchEndOfFight(EnemyObject)} WaitVal=unit
+							  elseif {Fight EnemyObject PokemonPlayer}==true then {Window close} {Send EnemyObject watchEndOfFight(PokemonPlayer)} WaitVal=unit
 							  else skip
 							  end
 						  end)
@@ -153,8 +153,8 @@ define
 	       Desc = td( label(text:"you find another trainer")
 			  button(text:"ShowEnemyPokemon" action:proc{$} {ShowPokemon Pokemon "enemy s pokemon"} end)
 			  button(text:"Fight" action:proc{$}
-							     if {Fight PokemonPlayer Pokemon} then  {Window close} WaitVal=unit
-							     elseif {Fight Pokemon PokemonPlayer} then {Window close} WaitVal=unit
+							     if {Fight PokemonPlayer Pokemon} then  {Window close} {Send PokemonPlayer watchEndOfFight(Pokemon)} WaitVal=unit
+							     elseif {Fight Pokemon PokemonPlayer} then {Window close} {Send Pokemon watchEndOfFight(PokemonPlayer)} WaitVal=unit
 							     else skip
 							     end
 							  end)
