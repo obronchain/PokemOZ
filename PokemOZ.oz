@@ -5,20 +5,12 @@ import
    OS
    Browser
 export
-   Init
-   Browse
-   Fight
-   Player
-   PokemonPlayer
-   Map
-   PokemozBehaviour
-   MapObject
-   NewPortObject
-   Trainers
-   CreateGrassGood
-   CreateGrassBad
+   Init Browse Fight Player PokemonPlayer Map PokemozBehaviour
+   MapObject NewPortObject Trainers CreateGrassGood CreateGrassBad
    C
    Ca
+   HandelFight
+   ShowPokemon
    ImageWidth
    MoveBufferBehaviour
    MoveBuffer
@@ -26,6 +18,8 @@ export
    GrassBad
 define
    ImageWidth=60
+   HandelFight
+   ShowPokemon
    GrassGood = {QTk.newImage photo(url:'Images/grassgood.gif' height:0 width:0)}
    GrassBad = {QTk.newImage photo(url:'Images/grassbad.gif' height:0 width:0)}
    SachaLeft = {QTk.newImage photo(url:'Images/sachaleft.gif' height:0 width:0)}
@@ -237,28 +231,27 @@ in
 		     end
       %Permet de mettre les valeurs des hp level des pokemoz apres un combat
       []watchEndOfFight(EnemyObject) then local
-					Enemy				    
-				       fun{NewLevel N XP}
-					  {Delay 500}
-					  {Browse N}
-					  if N==0 then %trouve la nouvelle valeur des xp
-					     local NewXp in
-						if(Enemy.lx > State.lx)then NewXp = State.xp + Enemy.lx - State.lx
-						else NewXp = State.xp + 1 end
-						{NewLevel N+1 NewXp}
-					     end
-					  elseif N==7 then pokemon(name:State.name type:State.type xp:XP hp:State.hp lx:State.lx) %dans le cas ou aucun increment de niveau est necessaire
-					  elseif {And (XP >= LevelList.N.xp) (State.lx < LevelList.N.lx)} then %dans le cas ou il faut changer de niveau
-					     pokemon(name:State.name type:State.type xp:XP hp:LevelList.N.hp lx:LevelList.N.lx)
-					  else
-					     {NewLevel N+1 XP}
-					  end
+					     Enemy				    
+					     fun{NewLevel N XP}
+						{Browse N}
+						if N==0 then %trouve la nouvelle valeur des xp
+						   local NewXp in
+						      if(Enemy.lx > State.lx)then NewXp = State.xp + Enemy.lx - State.lx
+						      else NewXp = State.xp + 1 end
+						      {NewLevel N+1 NewXp}
+						   end
+						elseif N==7 then pokemon(name:State.name type:State.type xp:XP hp:State.hp lx:State.lx) %dans le cas ou aucun increment de niveau est necessaire
+						elseif {And (XP >= LevelList.N.xp) (State.lx < LevelList.N.lx)} then %dans le cas ou il faut changer de niveau
+						   pokemon(name:State.name type:State.type xp:XP hp:LevelList.N.hp lx:LevelList.N.lx)
+						else
+						   {NewLevel N+1 XP}
+						end
 				       
-				       end
+					     end
 					  in
 					     {Send EnemyObject getState(Enemy)}
-				       {NewLevel 0 0}
-				    end				    
+					     {NewLevel 0 0}
+					  end				    
       end
    end
 
@@ -309,7 +302,7 @@ in
 	 %voir si il y a eut changement de position
 		  if {And NewX==0 NewY==0} then {Send State.pokemon cure(_)}  Boolean = false trainer(name:State.name pokemon:State.pokemon positionX:NewX positionY:NewY busy:false )
 		  elseif {Or {And State.positionY==NewY State.positionX==NewX} {Bool.'not' {IsFreePositionFor ThisTrainer Trainers NewX NewY}}} then Boolean=false State
-		  elseif {Bool.'not' ThisTrainer==Player} then Boolean=false train(name:State.name pokemon:State.pokemon positionX:NewX positionY:NewY busy:false)
+		  %elseif {Bool.'not' ThisTrainer==Player} then Boolean=false train(name:State.name pokemon:State.pokemon positionX:NewX positionY:NewY busy:false)
 		  else
 	       %definition d'une fonction pour trouver si il y un trainer (retourne un tuple is(boolean trainer))
 		     local FindIfTrainer FindIfIn Result in
@@ -372,10 +365,11 @@ in
 	       elseif Random <75 then Move.dir = 'down'
 	       else Move.dir = 'left'
 	       end
+	       
 	       {Send MoveBuffer moveBuffer(trainer:Trainer moveCommand:Move)}
-	       if Move.boolean then Move.free=false
-	       else skip end
 	       {Send MapObject refresh(trainer:Trainer dir:Move.dir oldX:State.positionX oldY:State.positionY)}
+	       if Move.boolean then {HandelFight Trainer Move}
+	       else skip end
 	       {Loop}
 	    end
 	 end
@@ -383,4 +377,98 @@ in
 	 {Loop}     
       end
    end
+
+     % Permet de gerer l'interface graphique pour les combats. Que ce soit avec un autre entraineur ou un autre pokemon
+   proc{HandelFight StartingTrainer Move}
+      local EnemyObject Enemy WaitVal ImageWidth ImageHeight CanvaHeight CanvaWidth Ca StatePokemonPlayer PokemonPlayer TrainerState Player
+      in
+	 Player = StartingTrainer
+	 {Send Player getState(TrainerState)}
+	 PokemonPlayer = TrainerState.pokemon
+	 EnemyObject = Move.enemy
+	 {Send EnemyObject getState(Enemy)}
+	 {Send PokemonPlayer getState(StatePokemonPlayer)}
+	 ImageWidth = 60
+	 ImageHeight = 60
+	 CanvaWidth = 5
+	 CanvaHeight = 5
+	 {Browse [PokemonPlayer EnemyObject]}
+	 case Enemy of
+	    pokemon(name:Name type:Type lx:Lx hp:Hp xp:Xp) then
+	    local
+	       Desc
+	       Window
+	    in 
+	      % Desc = td( label(text:"you find a wild pokemon")
+	      % button(text:"show enemy's pokemon" action:proc{$}{ShowPokemon EnemyObject "wild Pokemon"} end)
+	      %		  button(text:"Fight" action:proc{$} {Send Player fight(EnemyObject)} WaitVal=unit end)
+	      %	  button(text:"Run" action:proc{$} WaitVal=unit end)
+	      %		)
+	       
+	       Desc=td(canvas(handle:Ca width:CanvaWidth*ImageWidth height:CanvaHeight*ImageWidth)
+		       button(text:"show enemy's pokemon" action:proc{$}{ShowPokemon EnemyObject "wild Pokemon"} end)
+		       button(text:"Fight" action:proc{$} {Browse [PokemonPlayer EnemyObject]}
+						          if {Fight PokemonPlayer EnemyObject}==true then {Window close} {Send PokemonPlayer watchEndOfFight(EnemyObject)} WaitVal=unit
+							  elseif {Fight EnemyObject PokemonPlayer}==true then {Window close} {Send EnemyObject watchEndOfFight(PokemonPlayer)} WaitVal=unit
+							  else skip
+							  end
+						  end)
+		       button(text:"Run" action:proc{$} {Window close} WaitVal=unit end)
+		       )
+	       Window= {QTk.build Desc}
+	       {Window show}
+	       {Ca create(text text:Name  anchor:nw font:white 1 1)}
+	       {Ca create(text text:Lx anchor:nw font:white 1 20)}
+	       {Ca create(text text:Hp anchor:nw font:white 1 40)}
+	       {Ca create(text text:StatePokemonPlayer.name  anchor:nw font:white (4)*ImageWidth (4)*ImageHeight)}
+	       {Ca create(text text:StatePokemonPlayer.lx anchor:nw font:white (4)*ImageWidth (4*ImageHeight+20))}
+	       {Ca create(text text:StatePokemonPlayer.hp anchor:nw font:white (4)*ImageWidth ((4*ImageHeight)+40))}
+	       {Ca create(image  (4)*ImageWidth (0)*ImageHeight anchor:nw image:GrassGood)}
+	       {Ca create(image  (0)*ImageWidth (4)*ImageHeight anchor:nw image:GrassGood)}
+
+	       {Wait WaitVal}
+	       {Send Player setBusy(false)}
+	    end
+	 []trainer(name:Name pokemon:Pokemon positionX:PosX positionY:PosY busy:Busy) then
+	    local
+	       Window
+	       Desc = td( label(text:"you find another trainer")
+			  button(text:"ShowEnemyPokemon" action:proc{$} {ShowPokemon Pokemon "enemy s pokemon"} end)
+			  button(text:"Fight" action:proc{$}
+							     if {Fight PokemonPlayer Pokemon} then  {Window close} {Send PokemonPlayer watchEndOfFight(Pokemon)} WaitVal=unit
+							     elseif {Fight Pokemon PokemonPlayer} then {Window close} {Send Pokemon watchEndOfFight(PokemonPlayer)} WaitVal=unit
+							     else skip
+							     end
+							  end)
+			)
+	    in
+	       Window={QTk.build Desc}
+	       {Window show}
+	    end
+	    {Wait WaitVal}
+	    {Send Move.enemy setBusy(false)}
+	    {Send Player setBusy(false)}
+	 end
+	 {Browse 'EndOfHandelFight'}
+      end
+   end
+
+    proc{ShowPokemon Pokemon Label}
+      local
+	 Desc
+	 State
+      in
+	 {Send Pokemon getState(State)}
+	 Desc = td(label(text:Label bg:white) bg:white
+		   lr(label(text:"Name:" bg:white) bg:white label(text:State.name bg:white))
+		   lr(label(text:"Type:" bg:white) bg:white label(text:State.type bg:white))
+		   lr(label(text:"Level:" bg:white) bg:white label(text:State.lx bg:white))
+		   lr(label(text:"Hp:" bg:white)	bg:white label(text:State.hp bg:white))
+		   lr(label(text:"Xp:" bg:white) bg:white label(text:State.xp bg:white))
+		   lr(button(text:"Close" action:toplevel#close bg:white)  bg:white)
+		  )
+	 {{QTk.build Desc} show}
+      end
+   end
+
 end
