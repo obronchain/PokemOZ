@@ -272,13 +272,11 @@ in
 			NewHp
 			proc{Loop N}
 			   {Browse N}
-			   {Delay 200}
 			   if LevelList.N.lx==State.lx then NewHp = LevelList.N.hp
 			   else {Loop N+1}  end 
 			end
 		     in
 			{Browse State}
-			{Delay 200}
 			{Loop 1}
 			pokemon(name:State.name type:State.type xp:State.xp hp:NewHp lx:State.lx)
 		     end
