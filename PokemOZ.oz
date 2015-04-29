@@ -17,9 +17,12 @@ export
    GrassGood
    GrassBad
    ShowImage
+   AutoFight
 define
    ImageWidth=60
    HandelFight
+   AutoFight
+   ChooseAutoFight
    ShowPokemon
    GrassGood = {QTk.newImage photo(url:'Images/grassgood.gif' height:0 width:0)}
    GrassBad = {QTk.newImage photo(url:'Images/grassbad.gif' height:0 width:0)}
@@ -207,12 +210,29 @@ in
 	 end
       end
    end
+
+   proc{ChooseAutoFight}
+       local
+	 WaitVal
+	 Window
+	 Desc = td(label(text:"Choose Autofight Options!" bg:white)
+		   button( action:proc{$} AutoFight= true WaitVal = true {Window close} end text:'AutoFight' bg:white)
+		   button( action:proc{$} AutoFight= false WaitVal=false {Window close} end text:'no AutoFight' bg:white)
+		   bg:white
+		  )
+      in
+	 Window= {QTk.build Desc}
+	  {Window show}
+	  {Wait WaitVal}
+      end
+   end
      
    %init les donnees utiles pour le jeu. Cree le joueur, son pokemon, la list des entraineurs, et lance le thread des autres entraineurs
    proc{Init}
       local  EnemyPokemon Loop in
 	 PokemonPlayer = {ChoosePokemon}
 	 {Wait PokemonPlayer}
+	 {ChooseAutoFight}
 	 %PokemonPlayer = {NewPortObject PokemozBehaviour pokemon(name:mapute type:grass hp:20 lx:5 xp:0)}
 	 Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0 busy:false)}
 	 Trainers = [Player {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
