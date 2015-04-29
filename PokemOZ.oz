@@ -216,6 +216,8 @@ in
 	 %PokemonPlayer = {NewPortObject PokemozBehaviour pokemon(name:mapute type:grass hp:20 lx:5 xp:0)}
 	 Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0 busy:false)}
 	 Trainers = [Player {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
+		     {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
+		     {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
 		    ]
 	 
 	 proc{Loop L}
@@ -317,7 +319,7 @@ in
 	 if (({OS.rand} mod 100) > ((6+StateA.lx-StateD.lx)*9)) then false
 	 else
 	    {Send PokemozD injure(Grid.(StateA.type).(StateD.type))}
-	    if (StateD.hp)-(Grid.(StateA.type).(StateD.type))>1 then false
+	    if (StateD.hp)-(Grid.(StateA.type).(StateD.type))>0 then false
 	    else true
 	    end 
 	 end
@@ -346,9 +348,8 @@ in
 				 else NewX = State.positionX+1 NewY = State.positionY end
 		  end	    
 	 %voir si il y a eut changement de position
-		  if {And NewX==0 NewY==0} then {Send State.pokemon cure(_)}  Boolean = false trainer(name:State.name pokemon:State.pokemon positionX:NewX positionY:NewY busy:false )
-		  elseif {Or {And State.positionY==NewY State.positionX==NewX} {Bool.'not' {IsFreePositionFor ThisTrainer Trainers NewX NewY}}} then Boolean=false State
-		  %elseif {Bool.'not' ThisTrainer==Player} then Boolean=false train(name:State.name pokemon:State.pokemon positionX:NewX positionY:NewY busy:false)
+		  if {Or {And State.positionY==NewY State.positionX==NewX} {Bool.'not' {IsFreePositionFor ThisTrainer Trainers NewX NewY}}} then Boolean=false State
+		  elseif {And NewX==0 NewY==0} then {Send State.pokemon cure(_)} Boolean = false trainer(name:State.name pokemon:State.pokemon positionX:NewX positionY:NewY busy:false)	
 		  else
 	       %definition d'une fonction pour trouver si il y un trainer (retourne un tuple is(boolean trainer))
 		     local FindIfTrainer FindIfIn Result in
