@@ -41,7 +41,13 @@ define
 
    C %canvas
    Ca
-  
+   proc{UpdateLevel X Y Pokemon Canva}
+      {Canva create(rectangle X Y (X+60) (Y+3)  fill:white)}
+      local PokemonState in {Send Pokemon getState(PokemonState)}
+	 {Canva create(rectangle X Y X+(PokemonState.hp*2) Y+3 fill:green)}
+      end	  
+   end
+   
    fun{ShowImage Type}
       case Type of 'grass' then Bulbasoz
       [] 'fire' then Charmandoz
@@ -479,11 +485,6 @@ in
 	       Window
 	       Canvas
 	    in 
-	      % Desc = td( label(text:"you find a wild pokemon")
-	      % button(text:"show enemy's pokemon" action:proc{$}{ShowPokemon EnemyObject "wild Pokemon"} end)
-	      %		  button(text:"Fight" action:proc{$} {Send Player fight(EnemyObject)} WaitVal=unit end)
-	      %	  button(text:"Run" action:proc{$} WaitVal=unit end)
-	      %		)
 	       
 	       Desc=td(canvas(handle:Canvas width:250 height:250 bg:white)
 		       button(text:"Fight" action:proc{$} {Browse [PokemonPlayer EnemyObject]}
@@ -513,6 +514,8 @@ in
 							{Send EnemyObject watchEndOfFight(PokemonPlayer)} WaitVal=unit
 						     else skip
 						     end
+						     {UpdateLevel 30 200 PokemonPlayer Canvas}
+						     {UpdateLevel 150 70 EnemyObject Canvas}
 						  end
 			      bg:white)
 		       button(text:"Run" action:proc{$} {Window close} WaitVal=unit end bg:white)
@@ -536,7 +539,8 @@ in
 	       
 	       {Canvas create(image 10 10 anchor:nw image:{ShowImage Enemy.type})}
 	       {Canvas create(image 140 140 anchor:nw image:{ShowImage StatePokemonPlayer.type})}
-
+	       {UpdateLevel 30 200 PokemonPlayer Canvas}
+	       {UpdateLevel 150 70 EnemyObject Canvas}
 	       {Wait WaitVal}
 	       {Send Player setBusy(false)}
 	    end
@@ -575,6 +579,8 @@ in
 							   {Send Pokemon watchEndOfFight(PokemonPlayer)} WaitVal=unit
 							else skip
 							end
+							{UpdateLevel 30 200 PokemonPlayer Ca}
+							{UpdateLevel 150 70 Pokemon Ca}
 						     end
 				 bg:white
 				)
@@ -597,7 +603,8 @@ in
 	       {Ca create(text 60 140 text:StatePokemonPlayer.name  anchor:nw)}
 	       {Ca create(text 60 155 text:StatePokemonPlayer.lx anchor:nw )}
 	       {Ca create(text 60 170 text:StatePokemonPlayer.hp anchor:nw )}
-	       
+	       {UpdateLevel 30 200 PokemonPlayer Ca}
+	       {UpdateLevel 150 70 Pokemon Ca}
 	       {Ca create(image 10 10 anchor:nw image:{ShowImage EnemyPokemon.type})}
 	       {Ca create(image 140 140 anchor:nw image:{ShowImage StatePokemonPlayer.type})}
 	    end
@@ -655,6 +662,8 @@ in
 	    in
 	       proc{Loop}
 		  {Delay (10-Speed)*200}
+		  {UpdateLevel 30 200 PokemonPlayer Canvas}
+		  {UpdateLevel 150 70 EnemyObject Canvas}
 		  if {ActionFight} then skip
 		  else {Loop} end
 	       end
@@ -711,6 +720,8 @@ in
 	       
 	       {Canvas create(image 10 10 anchor:nw image:{ShowImage Enemy.type})}
 	       {Canvas create(image 140 140 anchor:nw image:{ShowImage StatePokemonPlayer.type})}
+	       {UpdateLevel 30 200 PokemonPlayer Canvas}
+	       {UpdateLevel 150 70 EnemyObject Canvas}
 
 	       {Loop}
 	       {Wait WaitVal}
@@ -724,6 +735,8 @@ in
 	       proc{Loop}
 		  {Delay (10-Speed)*200}
 		  {Browse 'inLoop'}
+		  {UpdateLevel 30 200 PokemonPlayer Ca}
+		  {UpdateLevel 150 70 Pokemon Ca}
 		  if {ActionFight} then skip
 		  else {Loop} end
 	       end
@@ -780,6 +793,8 @@ in
 	       
 	       {Ca create(image 10 10 anchor:nw image:{ShowImage EnemyPokemon.type})}
 	       {Ca create(image 140 140 anchor:nw image:{ShowImage StatePokemonPlayer.type})}
+	       {UpdateLevel 30 200 PokemonPlayer Ca}
+	       {UpdateLevel 150 70 Pokemon Ca}
 	       {Loop}
 	    end
 	    {Wait WaitVal}
@@ -788,4 +803,6 @@ in
 	 end
       end
    end
+
+   
 end
