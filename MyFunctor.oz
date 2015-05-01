@@ -2,6 +2,7 @@ functor
 import
    QTk at 'x-oz://system/wp/QTk.ozf'
    PokemOZ at 'PokemOZ.ozf'
+   OS
    System
    Atom
 
@@ -9,6 +10,7 @@ define
    GrassGood = PokemOZ.grassGood
    HandelFight = PokemOZ.handelFight
    Player = PokemOZ.player
+   Speed = PokemOZ.speed
    Browse = PokemOZ.browse
    Trainers = PokemOZ.trainers
    MoveBuffer = PokemOZ.moveBuffer
@@ -27,6 +29,9 @@ define
    C = PokemOZ.c
    Ca = PokemOZ.ca
    ShowImage = PokemOZ.showImage
+   AutoFightHandler = PokemOZ.autoFightHandler
+   AutoFight = PokemOZ.autoFight
+
    %permet d'afficher la map et de liver les touches aux bouttons aux actions (MovingButton)
    proc{ShowMap} 
       local
@@ -57,11 +62,14 @@ define
 				%	bg:white
 				       )
 			       )
-		   }
-	 {Window bind(event:"<Up>" action:proc{$} {MovingButton 'up'} end)}
-	 {Window bind(event:"<Down>" action:proc{$} {MovingButton 'down'} end)}
-	 {Window bind(event:"<Left>" action:proc{$} {MovingButton 'left'} end)}
-	 {Window bind(event:"<Right>" action:proc{$} {MovingButton 'right'} end)}
+		  }
+	 if AutoFight==false then
+	    {Window bind(event:"<Up>" action:proc{$} {MovingButton 'up'} end)}
+	    {Window bind(event:"<Down>" action:proc{$} {MovingButton 'down'} end)}
+	    {Window bind(event:"<Left>" action:proc{$} {MovingButton 'left'} end)}
+	    {Window bind(event:"<Right>" action:proc{$} {MovingButton 'right'} end)}
+	 else skip end
+	 
 	 {Window show}
 	 {CreateCanvas 0 0}	 
 	 %{Ca create(image 30 30 anchor:nw image:GrassBad)} %Mettre l'image du pokemon
@@ -108,6 +116,26 @@ define
       end
    end
 in
+   proc{AutoFightHandler X Y}
+      local State StatePokemon NewX NewY in
+	 {Send Player getState(State)}
+	 {Send PokemonPlayer getState(StatePokemon)}
+	 
+	 if StatePokemon.hp==0 then NewX=0 NewY=0 
+	 elseif {And State.positionX==X State.positionY==Y} then NewX= ({OS.rand} mod 7) NewY=({OS.rand} mod 7)
+	 else NewX=X NewY=Y  end
+	 {Delay (10-Speed)*200}
+	 {Browse X}
+	 {Browse Y}
+
+	 
+	 if State.positionX < NewX then {HandelMove 'right'} 	 {Send MapObject refresh(trainer:Player dir:'right' oldX:State.positionX oldY:State.positionY)}
+	 elseif State.positionX > NewX then {HandelMove 'left'} 	 {Send MapObject refresh(trainer:Player dir:'left' oldX:State.positionX oldY:State.positionY)} 
+	 elseif State.positionY < NewY then {HandelMove 'down'} 	 {Send MapObject refresh(trainer:Player dir:'down' oldX:State.positionX oldY:State.positionY)}
+	 else {HandelMove 'up'} {Send MapObject refresh(trainer:Player dir:'up' oldX:State.positionX oldY:State.positionY)} end
+	 {AutoFightHandler NewX NewY}
+      end
+   end
    {Init} %initie toutes les valeurs
    {ShowMap} %montre la carte
 end

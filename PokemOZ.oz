@@ -18,6 +18,8 @@ export
    GrassBad
    ShowImage
    AutoFight
+   Speed
+   AutoFightHandler
 define
    ImageWidth=60
    HandelFight
@@ -33,6 +35,7 @@ define
    Bulbasoz = {QTk.newImage photo(url:'Images/Bulbasoz.gif' height:0 width:0)}
    Charmandoz = {QTk.newImage photo(url:'Images/Charmandoz.gif' height:0 width:0)}
    Oztirtle = {QTk.newImage photo(url:'Images/Oztirtle.gif' height:0 width:0)}
+   AutoFightHandler
 
    C %canvas
    Ca
@@ -106,7 +109,7 @@ in
       State
    end
    
-   Speed = 8
+   Speed = 2
    Browse = Browser.browse
    Map = column(line(1 1 0 0 1 1 0)
 		line(1 1 0 0 0 0 0)
@@ -247,6 +250,8 @@ in
 		       end
 	    end
 	 end
+	 if AutoFight then thread {AutoFightHandler ({OS.rand} mod 7) ({OS.rand} mod 7)} end
+	 else skip end
 	 {Loop Trainers}
 	 MapObject = {NewPortObject MapBehaviour map(trainers:Trainers)}
 	 MoveBuffer = {NewPortObject MoveBufferBehaviour move(_)}
@@ -622,5 +627,4 @@ in
 	 {Canvas create(image 10 10 anchor:nw image:{ShowImage State.type})}
       end
    end
-
 end
