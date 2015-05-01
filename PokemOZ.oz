@@ -21,9 +21,11 @@ export
    Speed
    AutoFightHandler
 define
+   HandelFightNoAuto
    ImageWidth=60
    HandelFight
    AutoFight
+   HandelFightAuto
    ChooseAutoFight
    ShowPokemon
    GrassGood = {QTk.newImage photo(url:'Images/grassgood.gif' height:0 width:0)}
@@ -109,14 +111,14 @@ in
       State
    end
    
-   Speed = 2
+   Speed = 6
    Browse = Browser.browse
    Map = column(line(1 1 0 0 1 1 0)
 		line(1 1 0 0 0 0 0)
-		line(0 0 0 0 0 0 0)
-		line(0 0 0 0 0 0 0)
-		line(1 0 0 0 0 0 0)
-		line(1 0 0 0 0 0 0)
+		line(0 0 0 0 1 1 1)
+		line(0 0 0 1 1 1 1)
+		line(1 0 0 1 1 0 0)
+		line(1 0 0 1 1 0 0)
 		line(0 0 0 0 0 0 0)
 	       )
    LevelList = level(
@@ -215,7 +217,7 @@ in
    end
 
    proc{ChooseAutoFight}
-       local
+      local
 	 WaitVal
 	 Window
 	 Desc = td(label(text:"Choose Autofight Options!" bg:white)
@@ -225,8 +227,8 @@ in
 		  )
       in
 	 Window= {QTk.build Desc}
-	  {Window show}
-	  {Wait WaitVal}
+	 {Window show}
+	 {Wait WaitVal}
       end
    end
      
@@ -240,7 +242,6 @@ in
 	 Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0 busy:false)}
 	 Trainers = [Player {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
 		     {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
-		     {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
 		    ]
 	 
 	 proc{Loop L}
@@ -250,8 +251,8 @@ in
 		       end
 	    end
 	 end
-	 if AutoFight then thread {AutoFightHandler ({OS.rand} mod 7) ({OS.rand} mod 7)} end
-	 else skip end
+	 if AutoFight then thread {AutoFightHandler ({OS.rand} mod 7) ({OS.rand} mod 7)} end HandelFight = HandelFightAuto
+	 else HandelFight = HandelFightNoAuto end
 	 {Loop Trainers}
 	 MapObject = {NewPortObject MapBehaviour map(trainers:Trainers)}
 	 MoveBuffer = {NewPortObject MoveBufferBehaviour move(_)}
@@ -457,7 +458,7 @@ in
    end
 
      % Permet de gerer l'interface graphique pour les combats. Que ce soit avec un autre entraineur ou un autre pokemon
-   proc{HandelFight StartingTrainer Move}
+   proc{HandelFightNoAuto StartingTrainer Move}
       local EnemyObject Enemy WaitVal ImageWidth ImageHeight CanvaHeight CanvaWidth Ca StatePokemonPlayer PokemonPlayer TrainerState Player
       in
 	 Player = StartingTrainer
@@ -625,6 +626,166 @@ in
 		  )
 	 {{QTk.build Desc} show}
 	 {Canvas create(image 10 10 anchor:nw image:{ShowImage State.type})}
+      end
+   end
+
+   proc{HandelFightAuto StartingTrainer Move}
+      local EnemyObject Enemy WaitVal ImageWidth ImageHeight CanvaHeight CanvaWidth Ca StatePokemonPlayer PokemonPlayer TrainerState Player
+      in
+	 Player = StartingTrainer
+	 {Send Player getState(TrainerState)}
+	 PokemonPlayer = TrainerState.pokemon
+	 EnemyObject = Move.enemy
+	 {Send EnemyObject getState(Enemy)}
+	 {Send PokemonPlayer getState(StatePokemonPlayer)}
+	 ImageWidth = 60
+	 ImageHeight = 60
+	 CanvaWidth = 5
+	 CanvaHeight = 5
+
+	 case Enemy of
+	    pokemon(name:Name type:Type lx:Lx hp:Hp xp:Xp) then
+	    local
+	       Desc
+	       Window
+	       Canvas
+	       ActionFight
+	       ActionRun
+	       Loop
+	    in
+	       proc{Loop}
+		  {Delay (10-Speed)*200}
+		  if {ActionFight} then skip
+		  else {Loop} end
+	       end
+	       
+	       ActionFight = fun{$}
+				if {Fight PokemonPlayer EnemyObject}==true then  {Window close}
+				   local
+				      StatePokemon
+				      {Send PokemonPlayer getState(StatePokemon)}
+				      Desc = td(label(text:"You won the fight!" bg:white)
+						lr(label(text:"Your pokemon has" bg:white) label(text:StatePokemon.hp bg:white) label(text:"Hp remaining." bg:white))
+						button(text:"Close" action:toplevel#close bg:white)
+						bg:white
+					       )
+				   in
+				      {{QTk.build Desc} show}
+				   end
+				   {Send PokemonPlayer watchEndOfFight(EnemyObject)} WaitVal=unit true
+				elseif {Fight EnemyObject PokemonPlayer}==true then  {Window close}
+				   local
+				      StatePokemon
+				      {Send EnemyObject getState(StatePokemon)}
+				      Desc = td(label(text:"You won the fight!" bg:white)
+						lr(label(text:"Your pokemon has" bg:white) label(text:StatePokemon.hp bg:white) label(text:"Hp remaining." bg:white))
+						button(text:"Close" action:toplevel#close bg:white)
+						bg:white
+					       )
+				   in
+				      {{QTk.build Desc} show}
+				   end
+				   {Send EnemyObject watchEndOfFight(PokemonPlayer)} WaitVal=unit true
+				else false
+				end
+			     end
+	       ActionRun = proc{$} {Window close} WaitVal=unit end
+	       Desc=td(canvas(handle:Canvas width:250 height:250 bg:white)
+		       bg:white
+		      )
+	       Window= {QTk.build Desc}
+	       {Window show}
+	       {Canvas create(text 130 10 text:"Name :"  anchor:nw)}
+	       {Canvas create(text 130 25 text:"Level :" anchor:nw )}
+	       {Canvas create(text 130 40 text:"Hp :" anchor:nw  )}
+	       {Canvas create(text 180 10 text:Enemy.name  anchor:nw)}
+	       {Canvas create(text 180 25 text:Enemy.lx anchor:nw )}
+	       {Canvas create(text 180 40 text:Enemy.hp anchor:nw )}
+	       
+	       {Canvas create(text 10 140 text:"Name :"  anchor:nw)}
+	       {Canvas create(text 10 155 text:"Level :" anchor:nw )}
+	       {Canvas create(text 10 170 text:"Hp :" anchor:nw  )}
+	       {Canvas create(text 60 140 text:StatePokemonPlayer.name  anchor:nw)}
+	       {Canvas create(text 60 155 text:StatePokemonPlayer.lx anchor:nw )}
+	       {Canvas create(text 60 170 text:StatePokemonPlayer.hp anchor:nw )}
+	       
+	       {Canvas create(image 10 10 anchor:nw image:{ShowImage Enemy.type})}
+	       {Canvas create(image 140 140 anchor:nw image:{ShowImage StatePokemonPlayer.type})}
+
+	       {Loop}
+	       {Wait WaitVal}
+	       {Send Player setBusy(false)}
+	    end
+	 []trainer(name:Name pokemon:Pokemon positionX:PosX positionY:PosY busy:Busy) then
+	    local
+	       Window
+	       EnemyPokemon
+	       Ca
+	       proc{Loop}
+		  {Delay (10-Speed)*200}
+		  {Browse 'inLoop'}
+		  if {ActionFight} then skip
+		  else {Loop} end
+	       end
+	       ActionFight = fun{$}
+				if {Fight PokemonPlayer Pokemon} then  {Window close}
+				   local
+				      StatePokemon
+				      {Send PokemonPlayer getState(StatePokemon)}
+				      Desc = td(label(text:"You won the fight!" bg:white)
+						lr(label(text:"Your pokemon has" bg:white) label(text:StatePokemon.hp bg:white) label(text:"Hp remaining." bg:white))
+						button(text:"Close" action:toplevel#close bg:white)
+						bg:white
+					       )
+				   in
+				      {{QTk.build Desc} show} 
+				   end
+				   {Send PokemonPlayer watchEndOfFight(Pokemon)} WaitVal=unit true
+				elseif {Fight Pokemon PokemonPlayer} then {Window close}
+				   local
+				      StatePokemon
+				      {Send Pokemon getState(StatePokemon)}
+				      Desc = td(label(text:"You lost the fight!" bg:white)
+						lr(label(text:"Enemy pokemon has" bg:white) label(text:StatePokemon.hp bg:white) label(text:"Hp remaining." bg:white))
+						button(text:"Close" action:toplevel#close bg:white)
+						bg:white
+					       )
+				   in
+				      {{QTk.build Desc} show} 
+				   end
+				   {Send Pokemon watchEndOfFight(PokemonPlayer)} WaitVal=unit true
+				else false
+				end
+			     end
+	       Desc = td( label(text:"A fight with another trainer just started!"  bg:white)
+			  canvas(handle:Ca height:250 width:250 bg:white)
+			)
+	    in	       
+	       Window={QTk.build Desc}
+	       {Window show}
+	       {Send Pokemon getState(EnemyPokemon)}
+	       {Ca create(text 130 10 text:"Name :"  anchor:nw)}
+	       {Ca create(text 130 25 text:"Level :" anchor:nw )}
+	       {Ca create(text 130 40 text:"Hp :" anchor:nw  )}
+	       {Ca create(text 180 10 text:EnemyPokemon.name  anchor:nw)}
+	       {Ca create(text 180 25 text:EnemyPokemon.lx anchor:nw )}
+	       {Ca create(text 180 40 text:EnemyPokemon.hp anchor:nw )}
+	       
+	       {Ca create(text 10 140 text:"Name :"  anchor:nw)}
+	       {Ca create(text 10 155 text:"Level :" anchor:nw )}
+	       {Ca create(text 10 170 text:"Hp :" anchor:nw  )}
+	       {Ca create(text 60 140 text:StatePokemonPlayer.name  anchor:nw)}
+	       {Ca create(text 60 155 text:StatePokemonPlayer.lx anchor:nw )}
+	       {Ca create(text 60 170 text:StatePokemonPlayer.hp anchor:nw )}
+	       
+	       {Ca create(image 10 10 anchor:nw image:{ShowImage EnemyPokemon.type})}
+	       {Ca create(image 140 140 anchor:nw image:{ShowImage StatePokemonPlayer.type})}
+	       {Loop}
+	    end
+	    {Wait WaitVal}
+	    {Send Move.enemy setBusy(false)}
+	    {Send Player setBusy(false)}
+	 end
       end
    end
 end

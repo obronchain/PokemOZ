@@ -129,9 +129,9 @@ in
 	 {Browse Y}
 
 	 
-	 if State.positionX < NewX then {HandelMove 'right'} 	 {Send MapObject refresh(trainer:Player dir:'right' oldX:State.positionX oldY:State.positionY)}
-	 elseif State.positionX > NewX then {HandelMove 'left'} 	 {Send MapObject refresh(trainer:Player dir:'left' oldX:State.positionX oldY:State.positionY)} 
-	 elseif State.positionY < NewY then {HandelMove 'down'} 	 {Send MapObject refresh(trainer:Player dir:'down' oldX:State.positionX oldY:State.positionY)}
+	 if State.positionX < NewX then {HandelMove 'right'} {Send MapObject refresh(trainer:Player dir:'right' oldX:State.positionX oldY:State.positionY)}
+	 elseif State.positionX > NewX then {HandelMove 'left'} {Send MapObject refresh(trainer:Player dir:'left' oldX:State.positionX oldY:State.positionY)} 
+	 elseif State.positionY < NewY then {HandelMove 'down'} {Send MapObject refresh(trainer:Player dir:'down' oldX:State.positionX oldY:State.positionY)}
 	 else {HandelMove 'up'} {Send MapObject refresh(trainer:Player dir:'up' oldX:State.positionX oldY:State.positionY)} end
 	 {AutoFightHandler NewX NewY}
       end
