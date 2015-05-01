@@ -109,15 +109,16 @@ define
    %permet de gerer les input sur les bouttons en gerer les actions du jeu (HandelMove) mais aussi en
    %mettant a jour l'interface graphique (resfresh(...))
    proc{MovingButton Dir}
-      local StateTrainer in
+      local StateTrainer Fini in
 	 {Send Player getState(StateTrainer)}
 	 {HandelMove Dir}
-	 {Send MapObject refresh(trainer:Player dir:Dir oldX:StateTrainer.positionX oldY:StateTrainer.positionY)}
+	 {Send MapObject refresh(trainer:Player dir:Dir oldX:StateTrainer.positionX oldY:StateTrainer.positionY fini:Fini)}
+	 {Wait Fini}
       end
    end
 in
    proc{AutoFightHandler X Y}
-      local State StatePokemon NewX NewY in
+      local State StatePokemon NewX NewY F in
 	 {Send Player getState(State)}
 	 {Send PokemonPlayer getState(StatePokemon)}
 	 
@@ -129,10 +130,11 @@ in
 	 {Browse Y}
 
 	 
-	 if State.positionX < NewX then {HandelMove 'right'} {Send MapObject refresh(trainer:Player dir:'right' oldX:State.positionX oldY:State.positionY)}
-	 elseif State.positionX > NewX then {HandelMove 'left'} {Send MapObject refresh(trainer:Player dir:'left' oldX:State.positionX oldY:State.positionY)} 
-	 elseif State.positionY < NewY then {HandelMove 'down'} {Send MapObject refresh(trainer:Player dir:'down' oldX:State.positionX oldY:State.positionY)}
-	 else {HandelMove 'up'} {Send MapObject refresh(trainer:Player dir:'up' oldX:State.positionX oldY:State.positionY)} end
+	 if State.positionX < NewX then {HandelMove 'right'} {Send MapObject refresh(trainer:Player dir:'right' oldX:State.positionX oldY:State.positionY fini:F)}
+	 elseif State.positionX > NewX then {HandelMove 'left'} {Send MapObject refresh(trainer:Player dir:'left' oldX:State.positionX oldY:State.positionY fini:F)} 
+	 elseif State.positionY < NewY then {HandelMove 'down'} {Send MapObject refresh(trainer:Player dir:'down' oldX:State.positionX oldY:State.positionY fini:F)}
+	 else {HandelMove 'up'} {Send MapObject refresh(trainer:Player dir:'up' oldX:State.positionX oldY:State.positionY fini:F)} end
+	 {Wait F}
 	 {AutoFightHandler NewX NewY}
       end
    end

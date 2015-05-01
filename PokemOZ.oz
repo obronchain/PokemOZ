@@ -107,17 +107,18 @@ in
    fun{MapBehaviour Msg State}
       % mapObject( map:Map canvas:Canvas)
       case Msg of
-	 refresh(trainer:Trainer dir:Dir oldX:OldX oldY:OldY) then
+	 refresh(trainer:Trainer dir:Dir oldX:OldX oldY:OldY fini:F) then
 	 local StateTrainer in {Send Trainer getState(StateTrainer)}
 	    if Map.(OldY+1).(OldX+1)==0 then {CreateGrassGood OldX OldY}
 	    else {CreateGrassBad OldX OldY} end
 	    {CreatePerso Dir StateTrainer.positionX StateTrainer.positionY}
+	    F = unit
 	 end
       end
       State
    end
    
-   Speed = 6
+   Speed = 8
    Browse = Browser.browse
    Map = column(line(1 1 0 0 1 1 0)
 		line(1 1 0 0 0 0 0)
@@ -443,7 +444,7 @@ in
 	 NewList     
 	 proc{Loop}
 	    {Delay (10-Speed)*200}
-	    local Move = move(dir:_ boolean:_ enemy:_ trainer:Trainer ) Random State in
+	    local Move = move(dir:_ boolean:_ enemy:_ trainer:Trainer ) Random State F in
 	       Random  = ({OS.rand} mod 100 )
 	       {Send Trainer getState(State)}
 	       if Random < 25 then Move.dir = 'up'
@@ -452,7 +453,8 @@ in
 	       else Move.dir = 'left'
 	       end
 	       {Send MoveBuffer moveBuffer(trainer:Trainer moveCommand:Move)}
-	       {Send MapObject refresh(trainer:Trainer dir:Move.dir oldX:State.positionX oldY:State.positionY)}
+	       {Send MapObject refresh(trainer:Trainer dir:Move.dir oldX:State.positionX oldY:State.positionY fini:F)}
+	       {Wait F}
 	       if Move.boolean then {HandelFight Move.enemy  move(dir:Move.dir boolean:Move.boolean enemy:Trainer trainer:Move.enemy)}
 	       else skip end
 	       {Loop}
