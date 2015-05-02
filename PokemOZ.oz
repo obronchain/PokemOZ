@@ -4,6 +4,7 @@ import
    QTk at 'x-oz://system/wp/QTk.ozf'
    OS
    Browser
+   Pickle
 export
    Init Browse Fight Player PokemonPlayer Map PokemozBehaviour
    MapObject NewPortObject Trainers CreateGrassGood CreateGrassBad
@@ -38,6 +39,7 @@ define
    Charmandoz = {QTk.newImage photo(url:'Images/Charmandoz.gif' height:0 width:0)}
    Oztirtle = {QTk.newImage photo(url:'Images/Oztirtle.gif' height:0 width:0)}
    AutoFightHandler
+   Probability
 
    C %canvas
    Ca
@@ -101,6 +103,8 @@ define
    GenerateRandomPokemon
    PokemonNameList
    MoveTrainersMap
+   ChooseSpeed
+   ChooseProbability
 in
 
    % L'objet qui permet de gerer la carte, de la refresh
@@ -118,16 +122,17 @@ in
       State
    end
    
-   Speed = 8
    Browse = Browser.browse
    Map = column(line(1 1 0 0 1 1 0)
-		line(1 1 0 0 0 0 0)
-		line(0 0 0 0 1 1 1)
-		line(0 0 0 1 1 1 1)
-		line(1 0 0 1 1 0 0)
-		line(1 0 0 1 1 0 0)
-		line(0 0 0 0 0 0 0)
-	       )
+   		line(1 1 0 0 0 0 0)
+   		line(0 0 0 0 1 1 1)
+   		line(0 0 0 1 1 1 1)
+   		line(1 0 0 1 1 0 0)
+   		line(1 0 0 1 1 0 0)
+   		line(0 0 0 0 0 0 0)
+   	       )
+   
+  % Map = {Pickle.load Map.txt}
    LevelList = level(
 		  n(lx:5 hp:20 xp:0)
 		  n(lx:6 hp:22 xp:5)
@@ -197,23 +202,25 @@ in
 	 Ozt
 	 Bulb
 	 Window
-	 Desc = td(label(text:"Choose your pokemon!" bg:white)
-		   lr(canvas(handle:Charm height:100 width:100 bg:white)
-		      canvas(handle:Ozt height:100 width:100 bg:white)
-		      canvas(handle:Bulb height:100 width:100 bg:white)
+	 Desc = td(label(text:"Click on the pokemon you want!" bg:white)
+		   lr(canvas(handle:Charm height:120 width:120 bg:white)
+		      canvas(handle:Ozt height:120 width:120 bg:white)
+		      canvas(handle:Bulb height:120 width:120 bg:white)
 		     )
 		   bg:white
 		  )
       in
 	 Window= {QTk.build Desc}
 	 {Window show}
-	 {Charm create(image 0 0 anchor:nw image:Charmandoz)}
-	 {Ozt create(image 0 0 anchor:nw image:Oztirtle)}
-	 {Bulb create(image 0 0 anchor:nw image:Bulbasoz)}
+	 {Charm create(image 10 0 anchor:nw image:Charmandoz)}
+	 {Ozt create(image 10 0 anchor:nw image:Oztirtle)}
+	 {Bulb create(image 10 0 anchor:nw image:Bulbasoz)}
+	 {Charm create(text 0 100 anchor:nw text:"Charmandoz(Fire)")}
+	 {Ozt create(text 0 100 anchor:nw text:"Oztirtle(Water)")}
+	 {Bulb create(text 0 100 anchor:nw text:"Bulbasoz(Grass)")}
 	 {Charm bind(event:"<1>" action:proc{$} Pokemon=1 {Window close} end)}
 	 {Ozt bind(event:"<1>" action:proc{$} Pokemon=2 {Window close} end)}
 	 {Bulb bind(event:"<1>" action:proc{$} Pokemon=3 {Window close} end)}
-	 {Browse Pokemon}
 	 {Delay 2000}
 	 
 	 if Pokemon==1 then {NewPortObject PokemozBehaviour pokemon(name:"Salamèche" type:fire hp:20 lx:5 xp:0)}
@@ -223,121 +230,173 @@ in
       end
    end
 
+
+   
    proc{ChooseAutoFight}
       local
 	 WaitVal
 	 Window
-	 Desc = td(label(text:"Choose Autofight Options!" bg:white)
-		   button( action:proc{$} AutoFight= true WaitVal = true {Window close} end text:'AutoFight' bg:white)
-		   button( action:proc{$} AutoFight= false WaitVal=false {Window close} end text:'no AutoFight' bg:white)
-		   bg:white
-		  )
+	 Desc = td(td(label(text:"Choose Autofight Options! In Autofight mode, the main trainer tries to evovlve his pokemoz."
+			    bg:white)		      
+		      lr(button( action:proc{$} AutoFight= true {Window close} end text:'AutoFight' bg:white)			 
+			 button( action:proc{$} AutoFight= false {Window close} end text:'No AutoFight' bg:white))
+		      bg:white))
       in
 	 Window= {QTk.build Desc}
 	 {Window show}
-	 {Wait WaitVal}
       end
    end
+
+     proc{ChooseSpeed}
+	local
+	   Window
+	   Desc = td( td(label(text:"Choose the speed of the trainers!" bg:white)
+			 lr(button( action:proc{$} Speed=1 {Window close} end text:'1' bg:white)
+			    button( action:proc{$} Speed=2  {Window close} end text:'2' bg:white)
+			    button( action:proc{$} Speed=3 {Window close}  end text:'3' bg:white)
+			    button( action:proc{$} Speed=4 {Window close}  end text:'4' bg:white)
+			    button( action:proc{$} Speed=5 {Window close} end text:'5' bg:white)
+			    button( action:proc{$} Speed=6 {Window close} end text:'6' bg:white)
+			    button( action:proc{$} Speed=7  {Window close} end text:'7' bg:white)
+			    button( action:proc{$} Speed=8  {Window close} end text:'8' bg:white)
+			    button( action:proc{$} Speed=9 {Window close} end text:'9' bg:white)
+			    bg:white)
+			 bg:white))
+	in
+	   Window= {QTk.build Desc}
+	   {Window show}
+	end
+     end
+
+     proc{ChooseProbability}
+	local
+	   Window
+	   Desc = td( td(label(text:"Choose the probability to find a PokemOZ in the bushes!" bg:white)
+ 		      lr(button( action:proc{$} Probability= 1 {Window close} end text:'10%' bg:white)
+ 			 button( action:proc{$} Probability= 2 {Window close} end text:'20%' bg:white)
+ 			 button( action:proc{$} Probability= 3 {Window close} end text:'30%' bg:white)
+ 			 button( action:proc{$} Probability= 4 {Window close}  end text:'40%' bg:white)
+ 			 button( action:proc{$} Probability= 5 {Window close} end text:'50%' bg:white)
+ 			 button( action:proc{$} Probability= 6 {Window close} end text:'60%' bg:white)
+ 			 button( action:proc{$} Probability= 7 {Window close} end text:'70%' bg:white)
+ 			 button( action:proc{$} Probability= 8 {Window close} end text:'80%' bg:white)
+ 			 button( action:proc{$} Probability= 9 {Window close} end text:'90%' bg:white)
+ 			 button( action:proc{$} Probability= 10 {Window close} end text:'100%' bg:white)
+			 bg:white)
+			)
+		    )
+	in
+	   Window= {QTk.build Desc}
+	   {Window show}
+	end
+     end
+
+
      
    %init les donnees utiles pour le jeu. Cree le joueur, son pokemon, la list des entraineurs, et lance le thread des autres entraineurs
-   proc{Init}
-      local  EnemyPokemon Loop in
-	 PokemonPlayer = {ChoosePokemon}
-	 {Wait PokemonPlayer}
-	 {ChooseAutoFight}
-	 %PokemonPlayer = {NewPortObject PokemozBehaviour pokemon(name:mapute type:grass hp:20 lx:5 xp:0)}
-	 Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0 busy:false)}
-	 Trainers = [Player {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
-		     {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
-		    ]
-	 
-	 proc{Loop L}
-	    case L of nil then skip
-	    []H|T then if (H==Player) then {Loop T}
-		       else thread {MoveTrainersMap H} end {Loop T}
-		       end
+	 proc{Init}
+	    local  EnemyPokemon Loop in
+	       
+	       {ChooseAutoFight}	       
+	       {Wait AutoFight}
+	       {ChooseSpeed}
+	       {Wait Speed}
+	       {ChooseProbability} 
+	       {Wait Probability}
+	       PokemonPlayer = {ChoosePokemon}
+	       {Wait PokemonPlayer}
+	       Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0 busy:false)}
+	       Trainers = [Player {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
+			   {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
+			  ]
+	       
+	       proc{Loop L}
+		  case L of nil then skip
+		  []H|T then if (H==Player) then {Loop T}
+			     else thread {MoveTrainersMap H} end {Loop T}
+			     end
+		  end
+	       end
+	       if AutoFight then thread {AutoFightHandler ({OS.rand} mod 7) ({OS.rand} mod 7)} end HandelFight = HandelFightAuto
+	       else HandelFight = HandelFightNoAuto end
+	       {Loop Trainers}
+	       MapObject = {NewPortObject MapBehaviour map(trainers:Trainers)}
+	       MoveBuffer = {NewPortObject MoveBufferBehaviour move(_)}
 	    end
 	 end
-	 if AutoFight then thread {AutoFightHandler ({OS.rand} mod 7) ({OS.rand} mod 7)} end HandelFight = HandelFightAuto
-	 else HandelFight = HandelFightNoAuto end
-	 {Loop Trainers}
-	 MapObject = {NewPortObject MapBehaviour map(trainers:Trainers)}
-	 MoveBuffer = {NewPortObject MoveBufferBehaviour move(_)}
-      end
-   end
-
-   
-
-   
-   fun {NewPortObject Behaviour Init}
-      proc {MsgLoop S1 State}
-	 case S1 of Msg|S2 then
-	    {MsgLoop S2 {Behaviour Msg State}}
-	 [] nil then skip
+	 
+	 
+	 
+	 
+	 fun {NewPortObject Behaviour Init}
+	    proc {MsgLoop S1 State}
+	       case S1 of Msg|S2 then
+		  {MsgLoop S2 {Behaviour Msg State}}
+	       [] nil then skip
+	       end
+	    end
+	    Sin
+	 in
+	    thread {MsgLoop Sin Init} end
+	    {NewPort Sin}
 	 end
-      end
-      Sin
-   in
-      thread {MsgLoop Sin Init} end
-      {NewPort Sin}
-   end
-
+	 
 %La fonction qui gere le Port pour les pokemon
-   fun{PokemozBehaviour Msg State}
-      case Msg of
+	 fun{PokemozBehaviour Msg State}
+	    case Msg of
       %Cette methode est appelee quand on blesse un pokemoz avec un valeur de X
-	 injure(X) then local NewHp in
-			   if State.hp - X < 0 then NewHp=0
-			   else NewHp = State.hp - X end
-			   pokemon(name:State.name type:State.type
-				   hp:NewHp lx:State.lx xp:State.xp)
+	       injure(X) then local NewHp in
+				 if State.hp - X < 0 then NewHp=0
+				 else NewHp = State.hp - X end
+				 pokemon(name:State.name type:State.type
+					 hp:NewHp lx:State.lx xp:State.xp)
 			end
       %Lie letat du portObject a X
-      []fight(EnemyObject) then
-	 local Enemy in
-	    {Send EnemyObject getState(Enemy)}
-	    case Enemy of trainer(name:Name pokemon:PokemonEnemy positionX:X positionY:Y busy:Busy) then local Winner in Winner = {Fight State.pokemon PokemonEnemy} end  State
-	    [] pokemon(name:Name type:Type lx:Lx xp:Xp hp:Hp) then	  
-	       local Winner = {Fight State.pokemon EnemyObject} in  State end      
+	    []fight(EnemyObject) then
+	       local Enemy in
+		  {Send EnemyObject getState(Enemy)}
+		  case Enemy of trainer(name:Name pokemon:PokemonEnemy positionX:X positionY:Y busy:Busy) then local Winner in Winner = {Fight State.pokemon PokemonEnemy} end  State
+		  [] pokemon(name:Name type:Type lx:Lx xp:Xp hp:Hp) then	  
+		     local Winner = {Fight State.pokemon EnemyObject} in  State end      
+		  end
+	       end
+	    []getState(X) then X = State State
+	 % soigne le pokemon
+	    []cure(X) then local
+			      NewHp
+			      proc{Loop N}
+				 {Browse N}
+				 if LevelList.N.lx==State.lx then NewHp = LevelList.N.hp
+				 else {Loop N+1}  end 
+			      end
+			   in
+			      {Browse State}
+			      {Loop 1}
+			      pokemon(name:State.name type:State.type xp:State.xp hp:NewHp lx:State.lx)
+			   end
+      %Permet de mettre les valeurs des hp level des pokemoz apres un combat
+	    []watchEndOfFight(EnemyObject) then local
+						   Enemy				    
+						   fun{NewLevel N XP}
+						      if N==0 then %trouve la nouvelle valeur des xp
+							 local NewXp in
+							    NewXp = State.xp + Enemy.lx
+							    {NewLevel N+1 NewXp}
+							 end
+						      elseif N==7 then pokemon(name:State.name type:State.type xp:XP hp:State.hp lx:State.lx) %dans le cas ou aucun increment de niveau est necessaire
+						      elseif {And (XP >= LevelList.N.xp) (State.lx < LevelList.N.lx)} then %dans le cas ou il faut changer de niveau
+							 pokemon(name:State.name type:State.type xp:XP hp:LevelList.N.hp lx:LevelList.N.lx)
+						      else
+							 {NewLevel N+1 XP}
+						      end
+						      
+						   end
+						in
+						   {Send EnemyObject getState(Enemy)}
+						   {NewLevel 0 0}
+						end				    
 	    end
 	 end
-      []getState(X) then X = State State
-	 % soigne le pokemon
-      []cure(X) then local
-			NewHp
-			proc{Loop N}
-			   {Browse N}
-			   if LevelList.N.lx==State.lx then NewHp = LevelList.N.hp
-			   else {Loop N+1}  end 
-			end
-		     in
-			{Browse State}
-			{Loop 1}
-			pokemon(name:State.name type:State.type xp:State.xp hp:NewHp lx:State.lx)
-		     end
-      %Permet de mettre les valeurs des hp level des pokemoz apres un combat
-      []watchEndOfFight(EnemyObject) then local
-					     Enemy				    
-					     fun{NewLevel N XP}
-						if N==0 then %trouve la nouvelle valeur des xp
-						   local NewXp in
-						      NewXp = State.xp + Enemy.lx
-						      {NewLevel N+1 NewXp}
-						   end
-						elseif N==7 then pokemon(name:State.name type:State.type xp:XP hp:State.hp lx:State.lx) %dans le cas ou aucun increment de niveau est necessaire
-						elseif {And (XP >= LevelList.N.xp) (State.lx < LevelList.N.lx)} then %dans le cas ou il faut changer de niveau
-						   pokemon(name:State.name type:State.type xp:XP hp:LevelList.N.hp lx:LevelList.N.lx)
-						else
-						   {NewLevel N+1 XP}
-						end
-				       
-					     end
-					  in
-					     {Send EnemyObject getState(Enemy)}
-					     {NewLevel 0 0}
-					  end				    
-      end
-   end
 
 %simule les combats entre les pokemons. Renvoie true si D est battu
    fun{Fight PokemozA PokemozD}

@@ -1,0 +1,3 @@
+declare
+Map = {Pickle.load Map.txt}
+{Browse Map}
