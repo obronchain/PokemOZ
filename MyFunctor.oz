@@ -53,13 +53,6 @@ define
 	 %{Send PokemonPlayer getState(Statepok)}
       in
 	 Window = {QTk.build td(Desc td(button(text:"Show your pokemon" action:proc{$} {ShowPokemon PokemonPlayer "Your pokemon"} end)
-				%	canvas(handle:Ca width:2*ImageWidth height:(Height-3)*ImageWidth)
-				%	lr(label(text:"Name :" bg:white) label(text:Statepok.name bg:white)  bg:white)
-				%	lr(label(text:"Type : "  bg:white) label(text:Statepok.type  bg:white)  bg:white)
-				%	lr(label(text:"Level : "  bg:white) label(text:Statepok.lx  bg:white)  bg:white)
-				%	lr(label(text:"Hp : "  bg:white) label(text:Statepok.hp  bg:white)  bg:white)
-				%	lr(label(text:"Xp : "  bg:white) label(text:Statepok.xp  bg:white)  bg:white)
-				%	bg:white
 				       )
 			       )
 		  }
@@ -72,21 +65,6 @@ define
 	 
 	 {Window show}
 	 {CreateCanvas 0 0}	 
-	 %{Ca create(image 30 30 anchor:nw image:GrassBad)} %Mettre l'image du pokemon
-
-	 %{Ca create(text 5 90 anchor:nw text:"Name : ")}
-	 %{Ca create(text 60 90 anchor:nw text:Statepok.name)}
-	 %{Ca create(text 5 105 anchor:nw text:"Type : ")}
-	 %{Ca create(text 60 105 anchor:nw text:Statepok.type)}
-	 %{Ca create(text 5 120 anchor:nw text:"Level : ")}
-	 %{Ca create(text 60 120 anchor:nw text:Statepok.lx)}
-	 %{Ca create(text 5 135 anchor:nw text:"Xp : ")}
-	 %{Ca create(text 60 135 anchor:nw text:Statepok.xp)}
-	 %{Ca create(text 5 150 anchor:nw text:"Hp : ")}
-	 %{Ca create(text 60 150 anchor:nw text:Statepok.hp)}
-	 %{Ca delete}
-	 
-	% {Ca create(image 30 90 anchor:nw image:GrassBad)}
       end
    end
 

@@ -272,17 +272,18 @@ in
 	local
 	   Window
 	   Desc = td( td(label(text:"Choose the probability to find a PokemOZ in the bushes!" bg:white)
- 		      lr(button( action:proc{$} Probability= 1 {Window close} end text:'10%' bg:white)
- 			 button( action:proc{$} Probability= 2 {Window close} end text:'20%' bg:white)
- 			 button( action:proc{$} Probability= 3 {Window close} end text:'30%' bg:white)
- 			 button( action:proc{$} Probability= 4 {Window close}  end text:'40%' bg:white)
- 			 button( action:proc{$} Probability= 5 {Window close} end text:'50%' bg:white)
- 			 button( action:proc{$} Probability= 6 {Window close} end text:'60%' bg:white)
- 			 button( action:proc{$} Probability= 7 {Window close} end text:'70%' bg:white)
- 			 button( action:proc{$} Probability= 8 {Window close} end text:'80%' bg:white)
- 			 button( action:proc{$} Probability= 9 {Window close} end text:'90%' bg:white)
- 			 button( action:proc{$} Probability= 10 {Window close} end text:'100%' bg:white)
-			 bg:white)
+			 lr(button( action:proc{$} Probability= 0 {Window close} end text:'0%' bg:white)
+			    button( action:proc{$} Probability= 10 {Window close} end text:'10%' bg:white)
+			    button( action:proc{$} Probability= 20 {Window close} end text:'20%' bg:white)
+			    button( action:proc{$} Probability= 30 {Window close} end text:'30%' bg:white)
+			    button( action:proc{$} Probability= 40 {Window close}  end text:'40%' bg:white)
+			    button( action:proc{$} Probability= 50 {Window close} end text:'50%' bg:white)
+			    button( action:proc{$} Probability= 60 {Window close} end text:'60%' bg:white)
+			    button( action:proc{$} Probability= 70 {Window close} end text:'70%' bg:white)
+			    button( action:proc{$} Probability= 80 {Window close} end text:'80%' bg:white)
+			    button( action:proc{$} Probability= 90 {Window close} end text:'90%' bg:white)
+			    button( action:proc{$} Probability= 100 {Window close} end text:'100%' bg:white)
+			    bg:white)
 			)
 		    )
 	in
@@ -475,7 +476,7 @@ in
 			      if(Result.boolean) then Boolean = true
 				 {Send Result.trainer setBusy(true)} Enemy=Result.trainer trainer(name:State.name positionX:NewX
 												  positionY:NewY pokemon:State.pokemon busy:true) % il y a un trainer a cote
-			      elseif{And (({OS.rand} mod 100) < 30) {And Map.(NewY+1).(NewX+1)==1 ThisTrainer==Player}} then  Boolean = true Enemy = {GenerateRandomPokemon}
+			      elseif{And (({OS.rand} mod 100) < Probability) {And Map.(NewY+1).(NewX+1)==1 ThisTrainer==Player}} then  Boolean = true Enemy = {GenerateRandomPokemon}
 				 trainer(name:State.name positionX:NewX
 					 positionY:NewY pokemon:State.pokemon busy:true)
 			      else Boolean = false  trainer(name:State.name positionX:NewX
