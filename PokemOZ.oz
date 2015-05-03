@@ -21,6 +21,9 @@ export
    AutoFight
    Speed
    AutoFightHandler
+   ShowMap
+   HandelMove
+   MovingButton
 define
    HandelFightNoAuto
    ImageWidth=60
@@ -31,18 +34,30 @@ define
    ShowPokemon
    GrassGood = {QTk.newImage photo(url:'Images/grassgood.gif' height:0 width:0)}
    GrassBad = {QTk.newImage photo(url:'Images/grassbad.gif' height:0 width:0)}
+   
    SachaLeft = {QTk.newImage photo(url:'Images/sachaleft.gif' height:0 width:0)}
    SachaDown = {QTk.newImage photo(url:'Images/sachadown.gif' height:0 width:0)}
    SachaRight = {QTk.newImage photo(url:'Images/sacharight.gif' height:0 width:0)}
    SachaUp = {QTk.newImage photo(url:'Images/sachaup.gif' height:0 width:0)}
+   
+   EnemyLeft = {QTk.newImage photo(url:'Images/enemyleft.gif' height:0 width:0)}
+   EnemyDown = {QTk.newImage photo(url:'Images/enemydown.gif' height:0 width:0)}
+   EnemyRight = {QTk.newImage photo(url:'Images/enemyright.gif' height:0 width:0)}
+   EnemyUp = {QTk.newImage photo(url:'Images/enemyup.gif' height:0 width:0)}
+   
    Bulbasoz = {QTk.newImage photo(url:'Images/Bulbasoz.gif' height:0 width:0)}
    Charmandoz = {QTk.newImage photo(url:'Images/Charmandoz.gif' height:0 width:0)}
    Oztirtle = {QTk.newImage photo(url:'Images/Oztirtle.gif' height:0 width:0)}
    AutoFightHandler
    Probability
-
+   ShowMap
+   MovingButton
+   HandelMove
+   
    C %canvas
    Ca
+   
+   
    proc{UpdateLevel X Y Pokemon Canva}
       {Canva create(rectangle X Y (X+60) (Y+3)  fill:white)}
       local PokemonState in {Send Pokemon getState(PokemonState)}
@@ -67,15 +82,26 @@ define
    end
 
    %permet de placer un perso a une position X Y pour qu'il regarde dans la direction Dir
-   proc{CreatePerso Dir X Y}
+   proc{CreatePlayer Dir X Y Tag}
+      {Tag delete}
       case Dir of
-	 'up' then {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:SachaUp)}
-      []'down' then {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:SachaDown)}
-      [] 'right' then {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:SachaRight)}
-      [] 'left' then {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:SachaLeft)}
-      end	 
+	 'up' then {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:SachaUp tag:Tag)}
+      []'down' then {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:SachaDown tag:Tag)}
+      [] 'right' then {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:SachaRight tag:Tag)}
+      [] 'left' then {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:SachaLeft tag:Tag)}
+      end
    end
 
+    proc{CreateEnemy Dir X Y Tag}
+      {Tag delete}
+      case Dir of
+	 'up' then {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:EnemyUp tag:Tag)}
+      []'down' then {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:EnemyDown tag:Tag)}
+      [] 'right' then {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:EnemyRight tag:Tag)}
+      [] 'left' then {C create(image (X)*ImageWidth (Y)*ImageWidth anchor:nw image:EnemyLeft tag:Tag)}
+      end
+   end
+   
    % les Behaviour du buffer pour que les entraineurs changent leurs position 1 par 1
    fun{MoveBufferBehaviour Msg State}
       case Msg of moveBuffer(trainer: Trainer moveCommand:Move)
@@ -113,9 +139,9 @@ in
       case Msg of
 	 refresh(trainer:Trainer dir:Dir oldX:OldX oldY:OldY fini:F) then
 	 local StateTrainer in {Send Trainer getState(StateTrainer)}
-	    if Map.(OldY+1).(OldX+1)==0 then {CreateGrassGood OldX OldY}
-	    else {CreateGrassBad OldX OldY} end
-	    {CreatePerso Dir StateTrainer.positionX StateTrainer.positionY}
+	    if StateTrainer.name==sacha then  {CreatePlayer Dir StateTrainer.positionX StateTrainer.positionY StateTrainer.tag}
+	    else {CreateEnemy Dir StateTrainer.positionX StateTrainer.positionY StateTrainer.tag}
+	    end
 	    F = unit
 	 end
       end
@@ -291,12 +317,70 @@ in
 	   {Window show}
 	end
      end
-
-
+     
+     proc{HandelMove Dir}
+	local
+	   Move=move(dir:Dir enemy:_ boolean:_ trainer:Player) State
+	in
+	   {Send MoveBuffer moveBuffer(trainer:Player moveCommand:Move)} %on envoie au buffer qu'on veut bouger
+	   if Move.boolean then
+	      thread {HandelFight Player Move} end %si il y a un combat a faire
+	   else
+	      skip
+	   end
+	end
+     end
+     
+   %permet de gerer les input sur les bouttons en gerer les actions du jeu (HandelMove) mais aussi en
+   %mettant a jour l'interface graphique (resfresh(...))
+     proc{MovingButton Dir}
+	local StateTrainer Fini in
+	   {Send Player getState(StateTrainer)}
+	   {HandelMove Dir}
+	   {Send MapObject refresh(trainer:Player dir:Dir oldX:StateTrainer.positionX oldY:StateTrainer.positionY fini:Fini)}
+	   {Wait Fini}
+	end
+     end
+     
+     proc{ShowMap} 
+	local
+	   Height={Record.width Map $}
+	   Width={Record.width Map.1 $} 
+	   Desc=canvas(handle:C width:Width*ImageWidth height:Height*ImageWidth)
+	   Ca
+	   proc{CreateCanvas X Y}
+	      if X==Width then {CreateCanvas 0 Y+1}
+	      else if Y==Height then skip
+		   else if Map.(Y+1).(X+1)==0 then {CreateGrassGood X Y} {CreateCanvas X+1 Y}
+			else {CreateGrassBad X Y}  {CreateCanvas X+1 Y}
+			end
+		   end
+	      end
+	   end
+	   Window
+	 %Statepok
+	 %{Send PokemonPlayer getState(Statepok)}
+	in
+	   Window = {QTk.build td(Desc td(button(text:"Show your pokemon" action:proc{$} {ShowPokemon PokemonPlayer "Your pokemon"} end)
+					 )
+				 )
+		    }
+	   if AutoFight==false then
+	      {Window bind(event:"<Up>" action:proc{$} {MovingButton 'up'} end)}
+	      {Window bind(event:"<Down>" action:proc{$} {MovingButton 'down'} end)}
+	      {Window bind(event:"<Left>" action:proc{$} {MovingButton 'left'} end)}
+	      {Window bind(event:"<Right>" action:proc{$} {MovingButton 'right'} end)}
+	   else skip end
+	   
+	   {Window show}
+	   {CreateCanvas 0 0}	 
+	end
+     end
+     
      
    %init les donnees utiles pour le jeu. Cree le joueur, son pokemon, la list des entraineurs, et lance le thread des autres entraineurs
 	 proc{Init}
-	    local  EnemyPokemon Loop in
+	    local PlayerTag TrainerTag1 TrainerTag2  EnemyPokemon Loop in
 	       
 	       {ChooseAutoFight}	       
 	       {Wait AutoFight}
@@ -306,10 +390,19 @@ in
 	       {Wait Probability}
 	       PokemonPlayer = {ChoosePokemon}
 	       {Wait PokemonPlayer}
-	       Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0 busy:false)}
-	       Trainers = [Player {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
-			   {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false)}
+	       
+	       {ShowMap}
+	       {Wait C}
+	       
+	       PlayerTag = {C newTag($)}
+	       TrainerTag1= {C newTag($)}
+	       TrainerTag2= {C newTag($)}
+	       
+	       Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0 busy:false tag:PlayerTag)}
+	       Trainers = [Player {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:5 positionY:5 busy:false tag:TrainerTag1)}
+			   {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false tag:TrainerTag2)}
 			  ]
+	       
 	       
 	       proc{Loop L}
 		  case L of nil then skip
@@ -356,7 +449,7 @@ in
 	    []fight(EnemyObject) then
 	       local Enemy in
 		  {Send EnemyObject getState(Enemy)}
-		  case Enemy of trainer(name:Name pokemon:PokemonEnemy positionX:X positionY:Y busy:Busy) then local Winner in Winner = {Fight State.pokemon PokemonEnemy} end  State
+		  case Enemy of trainer(name:Name pokemon:PokemonEnemy positionX:X positionY:Y busy:Busy tag:Tag) then local Winner in Winner = {Fight State.pokemon PokemonEnemy} end  State
 		  [] pokemon(name:Name type:Type lx:Lx xp:Xp hp:Hp) then	  
 		     local Winner = {Fight State.pokemon EnemyObject} in  State end      
 		  end
@@ -424,7 +517,7 @@ in
       case Msg of
 	 getState(X) then X = State State
 	 %permet de dire qu'il est occupe (qu'il est occupe de combattre , le thread du trainer le fait plus bouger)
-      []setBusy(S) then  trainer(name:State.name pokemon:State.pokemon positionX:State.positionX positionY:State.positionY busy:S)
+      []setBusy(S) then  trainer(name:State.name pokemon:State.pokemon positionX:State.positionX positionY:State.positionY busy:S tag:State.tag)
 	 % permet de bouger le traineur. boolean dit est liee a true si il y a un combat. Enemy est alors lie a l'enemy a combattre, false sinon pour boolean 
       []move(dir:Dir boolean:Boolean enemy:Enemy trainer:ThisTrainer ) then %Enemy est soit un portObject trainer soit un tuple pokemon
 	 if State.busy then Boolean=false State
@@ -442,7 +535,7 @@ in
 		  end	    
 	 %voir si il y a eut changement de position
 		  if {Or {And State.positionY==NewY State.positionX==NewX} {Bool.'not' {IsFreePositionFor ThisTrainer Trainers NewX NewY}}} then Boolean=false State
-		  elseif {And NewX==0 NewY==0} then {Send State.pokemon cure(_)} Boolean = false trainer(name:State.name pokemon:State.pokemon positionX:NewX positionY:NewY busy:false)	
+		  elseif {And NewX==0 NewY==0} then {Send State.pokemon cure(_)} Boolean = false trainer(name:State.name pokemon:State.pokemon positionX:NewX positionY:NewY busy:false tag:State.tag)	
 		  else
 	       %definition d'une fonction pour trouver si il y un trainer (retourne un tuple is(boolean trainer))
 		     local FindIfTrainer FindIfIn Result in
@@ -469,18 +562,18 @@ in
 			   end
 			end
 			local ThisPokemonState in {Send State.pokemon getState(ThisPokemonState)}
-			   if ThisPokemonState.hp==0 then Boolean=false trainer(name:State.name positionX:NewX positionY:NewY pokemon:State.pokemon busy:false)
+			   if ThisPokemonState.hp==0 then Boolean=false trainer(name:State.name positionX:NewX positionY:NewY pokemon:State.pokemon busy:false tag:State.tag)
 			   else
 			      Result={FindIfTrainer ['#'(x:NewX+1 y:NewY) '#'(x:NewX-1 y:NewY) '#'(x:NewX y:NewY+1) '#'(x:NewX y:NewY-1)] Trainers} 
 			
 			      if(Result.boolean) then Boolean = true
 				 {Send Result.trainer setBusy(true)} Enemy=Result.trainer trainer(name:State.name positionX:NewX
-												  positionY:NewY pokemon:State.pokemon busy:true) % il y a un trainer a cote
+												  positionY:NewY pokemon:State.pokemon busy:true tag:State.tag) % il y a un trainer a cote
 			      elseif{And (({OS.rand} mod 100) < Probability) {And Map.(NewY+1).(NewX+1)==1 ThisTrainer==Player}} then  Boolean = true Enemy = {GenerateRandomPokemon}
 				 trainer(name:State.name positionX:NewX
-					 positionY:NewY pokemon:State.pokemon busy:true)
+					 positionY:NewY pokemon:State.pokemon busy:true tag:State.tag)
 			      else Boolean = false  trainer(name:State.name positionX:NewX
-							    positionY:NewY pokemon:State.pokemon busy:false)end %rien du tout 
+							    positionY:NewY pokemon:State.pokemon busy:false tag:State.tag)end %rien du tout 
 			   end
 			end
 		     end
@@ -490,7 +583,7 @@ in
       []fight(EnemyObject) then
 	 local Enemy in
 	    {Send EnemyObject getState(Enemy)}
-	    case Enemy of trainer(name:Name pokemon:PokemonEnemy positionX:X positionY:Y busy:Busy) then local Winner in Winner = {Fight State.pokemon PokemonEnemy} end  State
+	    case Enemy of trainer(name:Name pokemon:PokemonEnemy positionX:X positionY:Y busy:Busy tag:Tag) then local Winner in Winner = {Fight State.pokemon PokemonEnemy} end  State
 	    [] pokemon(name:Name type:Type lx:Lx xp:Xp hp:Hp) then	  
 	       local Winner = {Fight State.pokemon EnemyObject} in  State end      
 	    end
@@ -606,7 +699,7 @@ in
 	       {Wait WaitVal}
 	       {Send Player setBusy(false)}
 	    end
-	 []trainer(name:Name pokemon:Pokemon positionX:PosX positionY:PosY busy:Busy) then
+	 []trainer(name:Name pokemon:Pokemon positionX:PosX positionY:PosY busy:Busy tag:Tag) then
 	    local
 	       Window
 	       EnemyPokemon
@@ -789,7 +882,7 @@ in
 	       {Wait WaitVal}
 	       {Send Player setBusy(false)}
 	    end
-	 []trainer(name:Name pokemon:Pokemon positionX:PosX positionY:PosY busy:Busy) then
+	 []trainer(name:Name pokemon:Pokemon positionX:PosX positionY:PosY busy:Busy tag:Tag) then
 	    local
 	       Window
 	       EnemyPokemon
