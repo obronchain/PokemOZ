@@ -866,22 +866,12 @@ fun{ChoosePokemon}
 	 end
       end   
    end
-
-  
-%pokemon(name type lx hp xp)
-%trainer(name positionX positionY pokemon busy tag)
-%Map contient la carte
-%Fight fonction qui simule un combat entre 2 pokemon
-%Trainers La liste des entraineurs enemis sur le terrain (Des Ports object et pas des tuples)
-
-%PokemozBehaviour (getState(X) watchEndOfFight(Enemy) injure(X))
-%TrainerBehaviour (move(dir:Dir boolean:Boolean enemy:Enemy) getState(X) fight(Enemy)) Dir = 'up' ou 'down' ou 'left ou 'right' Boolean indique si enemy
-%       fight peut se faire battre un trainer avec un autre trainer ou un autre pokemon
-   
-%Le classe PortObject
-%On rajoute dans les trainers l'etat busy. cet etat permet de voir si il est occupe et ou si non. busy si est en combat.
      
-   
+
+
+   %----------------
+   %Lancement du jeu
+   %-----------------
          
    %Prend les parapètres, Affiche la carte et lance le jeu
    proc{Init}
