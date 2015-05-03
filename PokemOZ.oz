@@ -315,7 +315,9 @@ in
 			    button( action:proc{$} Probability= 90 {Window close} end text:'90%' bg:white)
 			    button( action:proc{$} Probability= 100 {Window close} end text:'100%' bg:white)
 			    bg:white)
+			 bg:white
 			)
+		      bg:white
 		    )
 	in
 	   Window= {QTk.build Desc}
