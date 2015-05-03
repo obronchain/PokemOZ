@@ -25,6 +25,7 @@ export
    HandelMove
    MovingButton
    Height
+   Width
 define
    HandelFightNoAuto
    ImageWidth=60
@@ -273,7 +274,7 @@ in
 	 WaitVal
 	 Window
 	 Desc = td(td(label(text:"Choose Autofight Options. In Autofight mode, the main trainer tries" bg:white)
-		      label(text:"to evovlve his pokemoz by fighting trainers or wild pokemoz." bg:white)		      
+		      label(text:"to go to the top right corner of the map." bg:white)		      
 		      lr(button( action:proc{$} AutoFight= true {Window close} end text:'AutoFight' bg:white)			 
 			 button( action:proc{$} AutoFight= false {Window close} end text:'No AutoFight' bg:white))
 		      bg:white))
@@ -287,7 +288,8 @@ in
 	local
 	   Window
 	   Desc = td( td(label(text:"Choose the speed of the trainers." bg:white)
-			 lr(button( action:proc{$} Speed=1 {Window close} end text:'1' bg:white)
+			 lr(button( action:proc{$} Speed=0 {Window close} end text:'0' bg:white)
+			    button( action:proc{$} Speed=1 {Window close} end text:'1' bg:white)
 			    button( action:proc{$} Speed=2  {Window close} end text:'2' bg:white)
 			    button( action:proc{$} Speed=3 {Window close}  end text:'3' bg:white)
 			    button( action:proc{$} Speed=4 {Window close}  end text:'4' bg:white)
@@ -295,7 +297,8 @@ in
 			    button( action:proc{$} Speed=6 {Window close} end text:'6' bg:white)
 			    button( action:proc{$} Speed=7  {Window close} end text:'7' bg:white)
 			    button( action:proc{$} Speed=8  {Window close} end text:'8' bg:white)
-			    button( action:proc{$} Speed=9 {Window close} end text:'9' bg:white)
+			    button( action:proc{$} Speed=9 {Window close} end text:'9' bg:white)			    
+			    button( action:proc{$} Speed=10 {Window close} end text:'10' bg:white)
 			    bg:white)
 			 bg:white))
 	in

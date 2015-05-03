@@ -34,7 +34,7 @@ define
    HandelMove = PokemOZ.handelMove
    MovingButton = PokemOZ.movingButton
    Height=PokemOZ.height
-
+   Width=PokemOZ.width
    %permet d'afficher la map et de liver les touches aux bouttons aux actions (MovingButton)
    
 
@@ -46,7 +46,7 @@ in
 	 {Send PokemonPlayer getState(StatePokemon)}
 	 
 	 if StatePokemon.hp==0 then NewX=0 NewY=(Height-1) 
-	 elseif {And State.positionX==X State.positionY==Y} then NewX= ({OS.rand} mod 7) NewY=({OS.rand} mod 7)
+	 elseif {And State.positionX==X State.positionY==Y} then NewX= (Width-1) NewY=0
 	 else NewX=X NewY=Y  end
 	 {Delay (10-Speed)*200}
 	 %{Browse X}
