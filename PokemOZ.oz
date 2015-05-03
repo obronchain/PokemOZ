@@ -24,6 +24,7 @@ export
    ShowMap
    HandelMove
    MovingButton
+   Height
 define
    HandelFightNoAuto
    ImageWidth=60
@@ -48,6 +49,7 @@ define
    Bulbasoz = {QTk.newImage photo(url:'Images/Bulbasoz.gif' height:0 width:0)}
    Charmandoz = {QTk.newImage photo(url:'Images/Charmandoz.gif' height:0 width:0)}
    Oztirtle = {QTk.newImage photo(url:'Images/Oztirtle.gif' height:0 width:0)}
+   
    AutoFightHandler
    Probability
    ShowMap
@@ -56,6 +58,8 @@ define
    
    C %canvas
    Ca
+   Height
+   Width
    
    
    proc{UpdateLevel X Y Pokemon Canva}
@@ -163,6 +167,8 @@ in
    		line(0 0 0 0 0 0 0)
    	       )
    
+   Height={Record.width Map $}
+   Width={Record.width Map.1 $} 
   % Map = {Pickle.load Map.txt}
    LevelList = level(
 		  n(lx:5 hp:20 xp:0)
@@ -252,7 +258,6 @@ in
 	 {Charm bind(event:"<1>" action:proc{$} Pokemon=1 {Window close} end)}
 	 {Ozt bind(event:"<1>" action:proc{$} Pokemon=2 {Window close} end)}
 	 {Bulb bind(event:"<1>" action:proc{$} Pokemon=3 {Window close} end)}
-	 {Delay 2000}
 	 
 	 if Pokemon==1 then {NewPortObject PokemozBehaviour pokemon(name:"Salamèche" type:fire hp:20 lx:5 xp:0)}
 	 elseif Pokemon==2 then {NewPortObject PokemozBehaviour pokemon(name:"Carapuce" type:water hp:20 lx:5 xp:0)}
@@ -351,8 +356,6 @@ in
      
      proc{ShowMap} 
 	local
-	   Height={Record.width Map $}
-	   Width={Record.width Map.1 $} 
 	   Desc=canvas(handle:C width:Width*ImageWidth height:Height*ImageWidth)
 	   Ca
 	   proc{CreateCanvas X Y}
@@ -370,7 +373,7 @@ in
 	in
 	   Window = {QTk.build td(Desc td(button(text:"Show your pokemon" action:proc{$} {ShowPokemon PokemonPlayer "Your pokemon"} end bg:white)
 					  bg:white )
-				 )
+				 bg:white)
 		    }
 	   if AutoFight==false then
 	      {Window bind(event:"<Up>" action:proc{$} {MovingButton 'up'} end)}
@@ -405,14 +408,18 @@ in
 	       TrainerTag1= {C newTag($)}
 	       TrainerTag2= {C newTag($)}
 	       
-	       Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:0 positionY:0 busy:false tag:PlayerTag)}
+	       Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:(Height-1) positionY:(Width-1) busy:false tag:PlayerTag)}
 	       Trainers = [Player {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:5 positionY:5 busy:false tag:TrainerTag1)}
 			   {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false tag:TrainerTag2)}
 			  ]
 	       
 	       proc{Loop L}
 		  case L of nil then skip
-		  []H|T then if (H==Player) then {CreatePlayer 'down' 0 0 PlayerTag}  {Loop T}
+		  []H|T then if (H==Player) then local State in
+						    {Send H getState(State)}
+						    {CreatePlayer 'down' State.positionX State.positionY  State.tag}
+						 end
+				{Loop T}
 			     else local StateEnemy in
 				     {Send H getState(StateEnemy)}
 				     {CreateEnemy 'down' StateEnemy.positionX StateEnemy.positionY StateEnemy.tag}
@@ -545,7 +552,7 @@ in
 		  end	    
 	 %voir si il y a eut changement de position
 		  if {Or {And State.positionY==NewY State.positionX==NewX} {Bool.'not' {IsFreePositionFor ThisTrainer Trainers NewX NewY}}} then Boolean=false State
-		  elseif {And NewX==0 NewY==0} then {Send State.pokemon cure(_)} Boolean = false trainer(name:State.name pokemon:State.pokemon positionX:NewX positionY:NewY busy:false tag:State.tag)	
+		  elseif {And NewX==0 NewY==(Height-1)} then {Send State.pokemon cure(_)} Boolean = false trainer(name:State.name pokemon:State.pokemon positionX:NewX positionY:NewY busy:false tag:State.tag)	
 		  else
 	       %definition d'une fonction pour trouver si il y un trainer (retourne un tuple is(boolean trainer))
 		     local FindIfTrainer FindIfIn Result in
