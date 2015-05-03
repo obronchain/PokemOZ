@@ -387,7 +387,7 @@ in
      
    %init les donnees utiles pour le jeu. Cree le joueur, son pokemon, la list des entraineurs, et lance le thread des autres entraineurs
 	 proc{Init}
-	    local PlayerTag TrainerTag1 TrainerTag2  EnemyPokemon Loop in
+	    local PlayerTag TrainerTag1 TrainerTag2  EnemyPokemon Loop Loop2 in
 	       
 	       {ChooseAutoFight}	       
 	       {Wait AutoFight}
@@ -410,11 +410,14 @@ in
 			   {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false tag:TrainerTag2)}
 			  ]
 	       
-	       
 	       proc{Loop L}
 		  case L of nil then skip
-		  []H|T then if (H==Player) then {Loop T}
-			     else thread {MoveTrainersMap H} end {Loop T}
+		  []H|T then if (H==Player) then {CreatePlayer 'down' 0 0 PlayerTag}  {Loop T}
+			     else local StateEnemy in
+				     {Send H getState(StateEnemy)}
+				     {CreateEnemy 'down' StateEnemy.positionX StateEnemy.positionY StateEnemy.tag}
+				     thread {MoveTrainersMap H}  end {Loop T}
+				  end
 			     end
 		  end
 	       end
