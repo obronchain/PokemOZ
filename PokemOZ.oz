@@ -59,9 +59,14 @@ define
    
    
    proc{UpdateLevel X Y Pokemon Canva}
-      {Canva create(rectangle X Y (X+60) (Y+3)  fill:white)}
-      local PokemonState in {Send Pokemon getState(PokemonState)}
-	 {Canva create(rectangle X Y X+(PokemonState.hp*2) Y+3 fill:green)}
+      local PokemonState Lx in {Send Pokemon getState(PokemonState)}
+	 Lx = (PokemonState.lx)-4
+	 {Canva create(rectangle X Y (X+(LevelList.Lx.hp)*3) (Y+8)  fill:white)}
+	 if (LevelList.Lx.hp) < (PokemonState.hp)*2 then {Canva create(rectangle X Y X+(PokemonState.hp*3) Y+8 fill:green)}	    
+	 else if (LevelList.Lx.hp) < (PokemonState.hp)*5 then {Canva create(rectangle X Y X+(PokemonState.hp*3) Y+8 fill:yellow)}
+	      else {Canva create(rectangle X Y X+(PokemonState.hp*3) Y+8 fill:red)}
+	      end
+	 end
       end	  
    end
    
@@ -207,7 +212,7 @@ in
       end
    end
 %pokemon(name type lx hp xp)
-%trainer(name positionX positionY pokemon)
+%trainer(name positionX positionY pokemon busy tag)
 %Map contient la carte
 %Fight fonction qui simule un combat entre 2 pokemon
 %Trainers La liste des entraineurs enemis sur le terrain (Des Ports object et pas des tuples)
@@ -643,29 +648,9 @@ in
 	       
 	       Desc=td(canvas(handle:Canvas width:250 height:250 bg:white)
 		       button(text:"Fight" action:proc{$} {Browse [PokemonPlayer EnemyObject]}
-						     if {Fight PokemonPlayer EnemyObject}==true then {Window close}local
-														      StatePokemon
-														      {Send PokemonPlayer getState(StatePokemon)}
-														      Desc = td(label(text:"You won the fight!" bg:white)
-																lr(label(text:"Your pokemon has" bg:white) label(text:StatePokemon.hp bg:white) label(text:"Hp remaining." bg:white))
-																button(text:"Close" action:toplevel#close bg:white)
-																bg:white
-															       )
-														   in
-														      {{QTk.build Desc} show}
-														   end
+						     if {Fight PokemonPlayer EnemyObject}==true then {Window close}
 							{Send PokemonPlayer watchEndOfFight(EnemyObject)} WaitVal=unit
-						     elseif {Fight EnemyObject PokemonPlayer}==true then {Window close} local
-															   StatePokemon
-															   {Send EnemyObject getState(StatePokemon)}
-															   Desc = td(label(text:"You won the fight!" bg:white)
-																     lr(label(text:"Your pokemon has" bg:white) label(text:StatePokemon.hp bg:white) label(text:"Hp remaining." bg:white))
-																     button(text:"Close" action:toplevel#close bg:white)
-																     bg:white
-																    )
-															in
-															   {{QTk.build Desc} show}
-															end
+						     elseif {Fight EnemyObject PokemonPlayer}==true then {Window close}
 							{Send EnemyObject watchEndOfFight(PokemonPlayer)} WaitVal=unit
 						     else skip
 						     end
@@ -708,29 +693,9 @@ in
 			  canvas(handle:Ca height:250 width:250 bg:white)
 			  button(text:"ShowEnemyPokemon" action:proc{$} {ShowPokemon Pokemon "Enemy's pokemon"} end  bg:white)
 			  button(text:"Fight" action:proc{$}
-							if {Fight PokemonPlayer Pokemon} then  {Window close} local
-														 StatePokemon
-														 {Send PokemonPlayer getState(StatePokemon)}
-														 Desc = td(label(text:"You won the fight!" bg:white)
-															   lr(label(text:"Your pokemon has" bg:white) label(text:StatePokemon.hp bg:white) label(text:"Hp remaining." bg:white))
-															   button(text:"Close" action:toplevel#close bg:white)
-															   bg:white
-															  )
-													      in
-														 {{QTk.build Desc} show}
-													      end
+							if {Fight PokemonPlayer Pokemon} then  {Window close}
 							   {Send PokemonPlayer watchEndOfFight(Pokemon)} WaitVal=unit
-							elseif {Fight Pokemon PokemonPlayer} then {Window close} local
-														    StatePokemon
-														    {Send Pokemon getState(StatePokemon)}
-														    Desc = td(label(text:"You lost the fight!" bg:white)
-															      lr(label(text:"Enemy pokemon has" bg:white) label(text:StatePokemon.hp bg:white) label(text:"Hp remaining." bg:white))
-															      button(text:"Close" action:toplevel#close bg:white)
-															      bg:white
-															     )
-														 in
-														    {{QTk.build Desc} show}
-														 end
+							elseif {Fight Pokemon PokemonPlayer} then {Window close}
 							   {Send Pokemon watchEndOfFight(PokemonPlayer)} WaitVal=unit
 							else skip
 							end
@@ -825,30 +790,8 @@ in
 	       
 	       ActionFight = fun{$}
 				if {Fight PokemonPlayer EnemyObject}==true then  {Window close}
-				   local
-				      StatePokemon
-				      {Send PokemonPlayer getState(StatePokemon)}
-				      Desc = td(label(text:"You won the fight!" bg:white)
-						lr(label(text:"Your pokemon has" bg:white) label(text:StatePokemon.hp bg:white) label(text:"Hp remaining." bg:white))
-						button(text:"Close" action:toplevel#close bg:white)
-						bg:white
-					       )
-				   in
-				      {{QTk.build Desc} show}
-				   end
 				   {Send PokemonPlayer watchEndOfFight(EnemyObject)} WaitVal=unit true
 				elseif {Fight EnemyObject PokemonPlayer}==true then  {Window close}
-				   local
-				      StatePokemon
-				      {Send EnemyObject getState(StatePokemon)}
-				      Desc = td(label(text:"You won the fight!" bg:white)
-						lr(label(text:"Your pokemon has" bg:white) label(text:StatePokemon.hp bg:white) label(text:"Hp remaining." bg:white))
-						button(text:"Close" action:toplevel#close bg:white)
-						bg:white
-					       )
-				   in
-				      {{QTk.build Desc} show}
-				   end
 				   {Send EnemyObject watchEndOfFight(PokemonPlayer)} WaitVal=unit true
 				else false
 				end
@@ -897,30 +840,8 @@ in
 	       end
 	       ActionFight = fun{$}
 				if {Fight PokemonPlayer Pokemon} then  {Window close}
-				   local
-				      StatePokemon
-				      {Send PokemonPlayer getState(StatePokemon)}
-				      Desc = td(label(text:"You won the fight!" bg:white)
-						lr(label(text:"Your pokemon has" bg:white) label(text:StatePokemon.hp bg:white) label(text:"Hp remaining." bg:white))
-						button(text:"Close" action:toplevel#close bg:white)
-						bg:white
-					       )
-				   in
-				      {{QTk.build Desc} show} 
-				   end
 				   {Send PokemonPlayer watchEndOfFight(Pokemon)} WaitVal=unit true
 				elseif {Fight Pokemon PokemonPlayer} then {Window close}
-				   local
-				      StatePokemon
-				      {Send Pokemon getState(StatePokemon)}
-				      Desc = td(label(text:"You lost the fight!" bg:white)
-						lr(label(text:"Enemy pokemon has" bg:white) label(text:StatePokemon.hp bg:white) label(text:"Hp remaining." bg:white))
-						button(text:"Close" action:toplevel#close bg:white)
-						bg:white
-					       )
-				   in
-				      {{QTk.build Desc} show} 
-				   end
 				   {Send Pokemon watchEndOfFight(PokemonPlayer)} WaitVal=unit true
 				else false
 				end
