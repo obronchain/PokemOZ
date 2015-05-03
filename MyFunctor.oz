@@ -7,50 +7,27 @@ import
    Atom
 
 define
-   GrassGood = PokemOZ.grassGood
-   HandelFight = PokemOZ.handelFight
    Player = PokemOZ.player
    Speed = PokemOZ.speed
-   Browse = PokemOZ.browse
-   Trainers = PokemOZ.trainers
-   MoveBuffer = PokemOZ.moveBuffer
    PokemonPlayer = PokemOZ.pokemonPlayer
-   Fight = PokemOZ.fight
-   ShowPokemon = PokemOZ.showPokemon
    Init = PokemOZ.init
-   Map = PokemOZ.map
-   PokemozBehaviour = PokemOZ.pokemozBehaviour
-   NewPortObject = PokemOZ.newPortObject
    MapObject = PokemOZ.mapObject
-   CreateGrassGood = PokemOZ.createGrassGood
-   CreateGrassBad = PokemOZ.createGrassBad
-   ImageWidth = PokemOZ.imageWidth
-   GrassBad=PokemOZ.grassBad
-   C = PokemOZ.c
-   Ca = PokemOZ.ca
-   ShowImage = PokemOZ.showImage
    AutoFightHandler = PokemOZ.autoFightHandler
-   AutoFight = PokemOZ.autoFight
    HandelMove = PokemOZ.handelMove
-   MovingButton = PokemOZ.movingButton
    Height=PokemOZ.height
    Width=PokemOZ.width
-   %permet d'afficher la map et de liver les touches aux bouttons aux actions (MovingButton)
-   
-
 
 in
    proc{AutoFightHandler X Y}
       local State StatePokemon NewX NewY F in
 	 {Send Player getState(State)}
 	 {Send PokemonPlayer getState(StatePokemon)}
-	 
-	 if StatePokemon.hp==0 then NewX=0 NewY=(Height-1) 
+
+	 %Si pokemon mort, Il va vers le soin, sinon il va dans le coin supérieur droit
+	 if StatePokemon.hp==0 then NewX=0 NewY=(Height-1)
 	 elseif {And State.positionX==X State.positionY==Y} then NewX= (Width-1) NewY=0
 	 else NewX=X NewY=Y  end
 	 {Delay (10-Speed)*200}
-	 %{Browse X}
-	 %{Browse Y}
 
 	 
 	 if State.positionX < NewX then {HandelMove 'right'} {Send MapObject refresh(trainer:Player dir:'right' oldX:State.positionX oldY:State.positionY fini:F)}
@@ -61,6 +38,5 @@ in
 	 {AutoFightHandler NewX NewY}
       end
    end
-   {Init} %initie toutes les valeurs
-   %{ShowMap} %montre la carte
+   {Init} %Lance le jeu
 end
