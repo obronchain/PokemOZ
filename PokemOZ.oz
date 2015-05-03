@@ -267,8 +267,8 @@ in
       local
 	 WaitVal
 	 Window
-	 Desc = td(td(label(text:"Choose Autofight Options! In Autofight mode, the main trainer tries to evovlve his pokemoz."
-			    bg:white)		      
+	 Desc = td(td(label(text:"Choose Autofight Options. In Autofight mode, the main trainer tries" bg:white)
+		      label(text:"to evovlve his pokemoz by fighting trainers or wild pokemoz." bg:white)		      
 		      lr(button( action:proc{$} AutoFight= true {Window close} end text:'AutoFight' bg:white)			 
 			 button( action:proc{$} AutoFight= false {Window close} end text:'No AutoFight' bg:white))
 		      bg:white))
@@ -281,7 +281,7 @@ in
      proc{ChooseSpeed}
 	local
 	   Window
-	   Desc = td( td(label(text:"Choose the speed of the trainers!" bg:white)
+	   Desc = td( td(label(text:"Choose the speed of the trainers." bg:white)
 			 lr(button( action:proc{$} Speed=1 {Window close} end text:'1' bg:white)
 			    button( action:proc{$} Speed=2  {Window close} end text:'2' bg:white)
 			    button( action:proc{$} Speed=3 {Window close}  end text:'3' bg:white)
@@ -302,7 +302,7 @@ in
      proc{ChooseProbability}
 	local
 	   Window
-	   Desc = td( td(label(text:"Choose the probability to find a PokemOZ in the bushes!" bg:white)
+	   Desc = td( td(label(text:"Choose the probability to find a PokemOZ in the bushes." bg:white)
 			 lr(button( action:proc{$} Probability= 0 {Window close} end text:'0%' bg:white)
 			    button( action:proc{$} Probability= 10 {Window close} end text:'10%' bg:white)
 			    button( action:proc{$} Probability= 20 {Window close} end text:'20%' bg:white)
@@ -368,8 +368,8 @@ in
 	 %Statepok
 	 %{Send PokemonPlayer getState(Statepok)}
 	in
-	   Window = {QTk.build td(Desc td(button(text:"Show your pokemon" action:proc{$} {ShowPokemon PokemonPlayer "Your pokemon"} end)
-					 )
+	   Window = {QTk.build td(Desc td(button(text:"Show your pokemon" action:proc{$} {ShowPokemon PokemonPlayer "Your pokemon"} end bg:white)
+					  bg:white )
 				 )
 		    }
 	   if AutoFight==false then
