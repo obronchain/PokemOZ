@@ -29,7 +29,6 @@ define
    MovingButton
    HandelMove
    C
-   Ca
    MoveBuffer
    MapObject
    MapBehaviour
