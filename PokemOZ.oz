@@ -95,6 +95,8 @@ define
    Bulbasoz = {QTk.newImage photo(url:'Images/Bulbasoz.gif' height:0 width:0)}
    Charmandoz = {QTk.newImage photo(url:'Images/Charmandoz.gif' height:0 width:0)}
    Oztirtle = {QTk.newImage photo(url:'Images/Oztirtle.gif' height:0 width:0)}
+   
+   Soin = {QTk.newImage photo(url:'Images/Soin.gif' height:0 width:0)}
 in
    %------------------
    %Gestion de la map
@@ -222,6 +224,7 @@ in
 	   
 	 {Window show}
 	 {CreateCanvas 0 0}	 
+	 {C create(image (0)*ImageWidth (6)*ImageWidth anchor:nw image:Soin)}
       end
    end
 
