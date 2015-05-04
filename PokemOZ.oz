@@ -423,7 +423,7 @@ fun{ChoosePokemon}
 	    in 
 	       
 	       Desc=td(canvas(handle:Canvas width:250 height:250 bg:white)
-		       button(text:"Fight" action:proc{$} {Browse [PokemonPlayer EnemyObject]}
+		       button(text:"Fight" action:proc{$} 
 						     if {Fight PokemonPlayer EnemyObject}==true then {Window close}
 							{Send PokemonPlayer watchEndOfFight(EnemyObject)} WaitVal=unit
 						     elseif {Fight EnemyObject PokemonPlayer}==true then {Window close}
@@ -590,7 +590,6 @@ fun{ChoosePokemon}
 	       Ca
 	       proc{Loop}
 		  {Delay (10-Speed)*200}
-		  {Browse 'inLoop'}
 		  {UpdateLevel 30 200 PokemonPlayer Ca}
 		  {UpdateLevel 150 70 Pokemon Ca}
 		  if {ActionFight} then skip
@@ -748,12 +747,10 @@ fun{ChoosePokemon}
       []cure(X) then local
 			NewHp
 			proc{Loop N}
-			   {Browse N}
 			   if LevelList.N.lx==State.lx then NewHp = LevelList.N.hp
 			   else {Loop N+1}  end 
 			end
 		     in
-			{Browse State}
 			{Loop 1}
 			pokemon(name:State.name type:State.type xp:State.xp hp:NewHp lx:State.lx)
 		     end
