@@ -5,9 +5,8 @@ if [ -e $fileWarning ]
 then
 	rm $fileWarning
 fi
-
-ozc -c MapCreator.oz &> $fileWarning 
 echo "Please wait. Compiling the PokemOZ project"
+ozc -c MapCreator.oz &> $fileWarning 
 ozc -c PokemOZ.oz &> $fileWarning
 echo "First file compiled. PokemOZ.ozf created"
 ozc -c MyFunctor.oz &>> $fileWarning

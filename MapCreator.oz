@@ -17,6 +17,8 @@ define
    HNRows % Handler for the nb of rows
    HNCols % Handler for the nb of cols
    MapThis
+   CreatingMode
+   DefaultMode
 
    TheMap = {NewCell nil}
    
@@ -109,104 +111,132 @@ define
       Hand
       TheRoad
    in
-      if Val == 0 then
-	 TheRoad = placeholder(
-		      glue:nswe
-		      handle:Hand
-		      {NewRoad Hand I J}
-		      )
-      else
-	 TheRoad = placeholder(
-		      glue:nswe
-		      handle:Hand
-		      {NewGrass Hand I J}
-		      )
+       if Val == 0 then
+			      TheRoad = placeholder(
+					   glue:nswe
+					   handle:Hand
+					   {NewRoad Hand I J}
+					   )
+			   else
+			      TheRoad = placeholder(
+					   glue:nswe
+					   handle:Hand
+					   {NewGrass Hand I J}
+					   )
+			   end
+	 TheRoad
       end
-      TheRoad
-   end
 
-   fun {CreateFrom MapThis}
-      NRows = @NbRows
-      NCols = @NbCols
-      Rows = {Adjoin td(glue:nswe) {MakeTuple td NRows}}
+      fun {CreateFrom MapThis}
+	 NRows = @NbRows
+	 NCols = @NbCols
+	 Rows = {Adjoin td(glue:nswe) {MakeTuple td NRows}}
+      in
+	 for I in 1..NRows
+	 do
+	    Rows.I = {Adjoin lr(glue:nswe) {MakeTuple lr NCols}}
+	    for J in 1..NCols
+	    do
+	       Rows.I.J = {SetRoad I J MapThis.I.J}
+	    end
+	 end
+	 Rows
+      end
+
+      proc {EmptyMap}
+	 TheMap := {MakeTuple map @NbRows}
+	 for I in 1..@NbRows
+	 do
+	    @TheMap.I = {MakeTuple r @NbCols}
+	    for J in 1..@NbCols
+	    do
+	       @TheMap.I.J = 0
+	    end
+	 end
+      end
+
+      %% Create the record for the map
+      fun {CreateMap}
+	 NRows = @NbRows
+	 NCols = @NbCols
+	 Rows = {Adjoin td(glue:nswe) {MakeTuple td NRows}}
+      in
+	 for I in 1..NRows
+	 do
+	    Rows.I = {Adjoin lr(glue:nswe) {MakeTuple lr NCols}}
+	    for J in 1..NCols
+	    do
+	       Rows.I.J = {SetRoad I J 0}
+	    end
+	 end
+	 {EmptyMap}
+	 Rows
+      end
    in
-      for I in 1..NRows
-      do
-	 Rows.I = {Adjoin lr(glue:nswe) {MakeTuple lr NCols}}
-	 for J in 1..NCols
-	 do
-	    Rows.I.J = {SetRoad I J MapThis.I.J}
-	 end
-      end
-      Rows
-   end
-
-   proc {EmptyMap}
-      TheMap := {MakeTuple map @NbRows}
-      for I in 1..@NbRows
-      do
-	 @TheMap.I = {MakeTuple r @NbCols}
-	 for J in 1..@NbCols
-	 do
-	    @TheMap.I.J = 0
-	 end
-      end
-   end
-
-   %% Create the record for the map
-   fun {CreateMap}
-      NRows = @NbRows
-      NCols = @NbCols
-      Rows = {Adjoin td(glue:nswe) {MakeTuple td NRows}}
-   in
-      for I in 1..NRows
-      do
-	 Rows.I = {Adjoin lr(glue:nswe) {MakeTuple lr NCols}}
-	 for J in 1..NCols
-	 do
-	    Rows.I.J = {SetRoad I J 0}
-	 end
-      end
-      {EmptyMap}
-      Rows
-   end
-in
-   %% Display the windows
-   Win = {QTk.build td(title:'MapCreator '#V
-		       placeholder(glue:nswe handle:MapThis)
-		       lr(
-			  td(
-			     {SetButton 'Save' Save}
-			     {SetButton 'Load' Load}
+      %% Display the windows
+      proc{CreatingMode}
+      Win = {QTk.build td(title:'MapCreator '#V
+			  placeholder(glue:nswe handle:MapThis)
+			  lr(
+			     td(
+				{SetButton 'Save' Save}
+				{SetButton 'Load' Load}
+				)
+			     {Edit NbRows 'Nb of rows: ' HNRows}
+			     {Edit NbCols 'Nb of cols: ' HNCols}
 			     )
-			  {Edit NbRows 'Nb of rows: ' HNRows}
-			  {Edit NbCols 'Nb of cols: ' HNCols}
-			  )
-		      )
-	 }
-   {Win show}   
-   {Delay 100}
+			 )
+	    }
+      {Win show}   
+      {Delay 100}
 
 
-   %% Get the Arguments
-   try
-      Args
-      NRows
-      NCols
-   in
-      Args = {Application.getArgs record()}
-      if {Length Args.1} == 2 then
-	 optRec([NRows NCols]) = Args
-	 {SetCell NbRows {String.toInt NRows} HNRows}
-	 {SetCell NbCols {String.toInt NCols} HNCols}
-	 {MapThis set(
-		 {CreateMap}
-		 )  }
-      else
-	 {Load}
+      %% Get the Arguments
+      try
+	 Args
+	 NRows
+	 NCols
+      in
+	 Args = {Application.getArgs record()}
+	 if {Length Args.1} == 2 then
+	    optRec([NRows NCols]) = Args
+	    {SetCell NbRows {String.toInt NRows} HNRows}
+	    {SetCell NbCols {String.toInt NCols} HNCols}
+	    {MapThis set(
+			{CreateMap}
+			)  }
+	 else
+	    {Load}
+	 end
+      catch _ then 
+	 {System.show 'error with arguments'}
       end
-   catch _ then 
-      {System.show 'error with arguments'}
+      end
+      
+   
+   
+   proc{DefaultMode}
+      MyMap =  column(line(1 1 0 0 1 1 0 1 0 0 0 0)
+		line(1 1 0 0 0 0 0 1 0 0 0 0)
+		line(0 0 0 0 1 1 1 1 0 0 0 0)
+		line(0 0 0 1 1 1 1 1 1 0 1 1)
+		line(1 0 0 1 1 0 0 1 1 1 1 1) 
+		line(1 0 0 1 1 0 0 1 1 1 1 1)
+		line(0 0 0 0 0 0 0 1 0 0 0 0)
+		line(0 1 1 1 0 0 0 0 0 0 0 0)
+	       )
    end
+
+       local
+	 WaitVal
+	 Window
+	 Desc = td(td(label(text:"Do you want to create your own map?" bg:white)
+		      lr(button( action:proc{$} {Window close} {DefaultMode}  end text:'Use default map' bg:white)			 
+			 button( action:proc{$} {Window close} {CreatingMode} {Wait MyMap} {Win close} end text:'Yes' bg:white))
+		      bg:white))
+      in
+	 Window= {QTk.build Desc}
+	 {Window show}
+      end
 
 end

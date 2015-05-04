@@ -804,7 +804,7 @@ fun{ChoosePokemon}
 		  case Dir of
 		     'up' then if(State.positionY-1 < 0) then NewY = State.positionY NewX = State.positionX
 			       else NewY = State.positionY-1 NewX = State.positionX end
-		  []'down' then if(State.positionY+1 > Height-1) then NewY = State.positionY NewX = State.positionX {Browse NewX} {Browse NewY}
+		  []'down' then if(State.positionY+1 > Height-1) then NewY = State.positionY NewX = State.positionX 
 				else NewY = State.positionY+1 NewX = State.positionX end
 		  []'left' then if(State.positionX-1<0) then NewX = State.positionX NewY = State.positionY
 				else NewX = State.positionX-1 NewY = State.positionY end
@@ -878,8 +878,7 @@ fun{ChoosePokemon}
    %Prend les parapètres, Affiche la carte et lance le jeu
    proc{Init}
       local PlayerTag TrainerTag1 TrainerTag2  EnemyPokemon Loop Loop2 in
-	 {Browse Height}
-	 {Browse Width}
+
 	 {ChooseAutoFight}	       
 	 {Wait AutoFight}
 	 {ChooseSpeed}
