@@ -1,0 +1,10 @@
+To start the PokemOZ project you can execute 
+
+$ ./start.sh
+
+If you want to run the project a second time without recompiling, please run 
+
+$ ozengine MyFunctor.ozf
+
+
+Please submit you contributions to https://github.com/obronchain/PokemOZ.git
