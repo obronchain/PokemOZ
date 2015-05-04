@@ -5,6 +5,7 @@ import
    OS
    Browser
    Pickle
+   MapCreator at 'MapCreator.ozf'
 export   
    Player
    Speed 
@@ -20,6 +21,7 @@ define
    ImageWidth=60
    HandelFight
    AutoFight
+   Map = MapCreator.myMap
    HandelFightAuto
    ChooseAutoFight
    ShowPokemon
@@ -56,14 +58,15 @@ define
    CreateGrassBad
    Browse = Browser.browse
   % Map = {Pickle.load Map.txt}
-   Map = column(line(1 1 0 0 1 1 0)
-		line(1 1 0 0 0 0 0)
-		line(0 0 0 0 1 1 1)
-		line(0 0 0 1 1 1 1)
-		line(1 0 0 1 1 0 0)
-		line(1 0 0 1 1 0 0)
-		line(0 0 0 0 0 0 0)
-	       )
+  % Map = column(line(1 1 0 0 1 1 0 1 0 0 0 0)
+%		line(1 1 0 0 0 0 0 1 0 0 0 0)
+%		line(0 0 0 0 1 1 1 1 0 0 0 0)
+%		line(0 0 0 1 1 1 1 1 1 0 1 1)
+%		line(1 0 0 1 1 0 0 1 1 1 1 1) 
+%		line(1 0 0 1 1 0 0 1 1 1 1 1)
+%		line(0 0 0 0 0 0 0 1 0 0 0 0)
+%		line(0 1 1 1 0 0 0 0 0 0 0 0)
+%	       )
    
    Height={Record.width Map $}
    Width={Record.width Map.1 $}
@@ -224,7 +227,7 @@ in
 	   
 	 {Window show}
 	 {CreateCanvas 0 0}	 
-	 {C create(image (0)*ImageWidth (6)*ImageWidth anchor:nw image:Soin)}
+	 {C create(image (0)*ImageWidth (Height-1)*ImageWidth anchor:nw image:Soin)}
       end
    end
 
@@ -801,11 +804,11 @@ fun{ChoosePokemon}
 		  case Dir of
 		     'up' then if(State.positionY-1 < 0) then NewY = State.positionY NewX = State.positionX
 			       else NewY = State.positionY-1 NewX = State.positionX end
-		  []'down' then if(State.positionY+1 > 6) then NewY = State.positionY NewX = State.positionX
+		  []'down' then if(State.positionY+1 > Height-1) then NewY = State.positionY NewX = State.positionX {Browse NewX} {Browse NewY}
 				else NewY = State.positionY+1 NewX = State.positionX end
 		  []'left' then if(State.positionX-1<0) then NewX = State.positionX NewY = State.positionY
 				else NewX = State.positionX-1 NewY = State.positionY end
-		  []'right' then if(State.positionX+1 >6) then NewX = State.positionX NewY = State.positionY
+		  []'right' then if(State.positionX+1 > Width-1) then NewX = State.positionX NewY = State.positionY
 				 else NewX = State.positionX+1 NewY = State.positionY end
 		  end	    
 	 %voir si il y a eut changement de position
@@ -816,7 +819,7 @@ fun{ChoosePokemon}
 		     local FindIfTrainer FindIfIn Result in
 			fun{FindIfIn PositionX PositionY L}
 			   case L of nil then false
-			   []H|T then if{And PositionX==H.x PositionY==H.y} then true
+			   []H|T then if {And {And PositionX==H.x PositionY==H.y} {And {Not H.x==0} {Not H.y==(Height-1)}}} then true
 				      else {FindIfIn PositionX PositionY T} end
 			   end		
 			end
@@ -875,7 +878,8 @@ fun{ChoosePokemon}
    %Prend les parapètres, Affiche la carte et lance le jeu
    proc{Init}
       local PlayerTag TrainerTag1 TrainerTag2  EnemyPokemon Loop Loop2 in
-	       
+	 {Browse Height}
+	 {Browse Width}
 	 {ChooseAutoFight}	       
 	 {Wait AutoFight}
 	 {ChooseSpeed}
@@ -892,7 +896,7 @@ fun{ChoosePokemon}
 	 TrainerTag1= {C newTag($)}
 	 TrainerTag2= {C newTag($)}
 	       
-	 Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:(Height-1) positionY:(Width-1) busy:false tag:PlayerTag)}
+	 Player = {NewPortObject TrainerBehaviour trainer(name:sacha pokemon:PokemonPlayer positionX:(Width-1) positionY:(Height-1) busy:false tag:PlayerTag)}
 	 Trainers = [Player {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:5 positionY:5 busy:false tag:TrainerTag1)}
 		     {NewPortObject TrainerBehaviour trainer(name:enemy pokemon:{GenerateRandomPokemon} positionX:3 positionY:3 busy:false tag:TrainerTag2)}
 		    ]
